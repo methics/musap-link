@@ -1,0 +1,19 @@
+// ============================================================================
+// musaplink.policy - Security Policy Permissions for MUSAP Link Servlet
+//
+// ==================================================================
+// MUSAP Link Servlet
+//
+
+grant codeBase "file:${catalina.home}/bin/tomcat-juli.jar" {
+    permission java.io.FilePermission "${catalina.base}/webapps/musaplink/WEB-INF/classes/log4j.properties", "read";
+    permission java.io.FilePermission "${catalina.base}/webapps/musaplink/WEB-INF/classes/commons-logging.properties", "read";
+    permission java.io.FilePermission "${catalina.base}/webapps/musaplink/WEB-INF/classes/logging.properties", "read";
+    permission java.util.PropertyPermission "org.apache.juli.ClassLoaderLogManager.debug","read";
+};
+
+grant codeBase "file:${catalina.base}/webapps/musaplink/WEB-INF/lib/-" {
+
+    permission java.security.AllPermission;
+
+};

@@ -1,0 +1,38 @@
+######################################################################
+# MUSAP Link Configuration
+######################################################################
+
+
+######################################################################
+## DB Configuration
+
+musaplink.db.url          = jdbc:postgresql://localhost:5432/musaplink
+musaplink.db.username     = musap
+musaplink.db.password     = musap
+musaplink.db.driver.class = org.postgresql.Driver
+
+######################################################################
+## Push Notification Configuration
+
+#musaplink.fcm.projectid = 
+#musaplink.fcm.projectname = 
+#musaplink.fcm.debug     = true
+#musaplink.fcm.apikey    = 
+#musaplink.fcm.debug     = true
+#musaplink.google.services.file = 
+
+
+######################################################################
+## External Client Configuration
+
+#musaplink.client.clientid.1                 = LOCAL
+#musaplink.client.apid.1                     = 
+#musaplink.client.appwd.1                    = 
+#musaplink.client.keystore.1                 = /tmp/keystore
+#musaplink.client.keystore.pwd.1             = 
+#musaplink.client.keystore.type.1            = JKS
+#musaplink.client.keystore.provider.1        = SUN
+#musaplink.client.signatureurl.1             = 
+#musaplink.client.statusurl.1                = 
+#musaplink.client.registrationurl.1          = 
+#musaplink.client.profileurl.1               = 
