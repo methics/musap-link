@@ -33,7 +33,7 @@ We recommend running MUSAP with:
 
 ## Configuration
 
-Configuration is done via standard Java properties. Example configuration can be found [here](https://github.com/methics/musap-link/blob/main/conf/musaplink.conf.sample)https://github.com/methics/musap-link/blob/main/conf/musaplink.conf.sample.
+Configuration is done via standard Java properties. Example configuration can be found [here](https://github.com/methics/musap-link/blob/main/conf/musaplink.conf.sample).
 
 ### Push Notification
 
