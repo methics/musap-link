@@ -1,7 +1,3 @@
-//
-//  (c) Copyright 2003-2020 Methics Technologies Oy. All rights reserved. 
-//
-
 package fi.methics.webapp.musaplink.util.push;
 
 import java.io.FileInputStream;

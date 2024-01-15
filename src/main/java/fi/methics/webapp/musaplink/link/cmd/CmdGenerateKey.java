@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.link.cmd;
 
 import java.util.concurrent.Callable;
@@ -21,7 +18,7 @@ import fi.methics.webapp.musaplink.util.SignatureCallback;
 import fi.methics.webapp.musaplink.util.push.PushClient;
 
 /**
- * Coupling API command for requesting new key generation from MUSAP
+ * Link API command for requesting new key generation from MUSAP
  */
 public class CmdGenerateKey extends LinkCommand<MusapGenerateKeyReq, MusapGenerateKeyResp> {
 

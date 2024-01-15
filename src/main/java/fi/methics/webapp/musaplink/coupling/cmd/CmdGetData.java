@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.coupling.cmd;
 
 import fi.methics.webapp.musaplink.AccountStorage;
@@ -12,6 +9,9 @@ import fi.methics.webapp.musaplink.coupling.json.SignatureReq;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 
+/**
+ * Coupling API command for checking for pending signature or key generation requests.
+ */
 public class CmdGetData extends CouplingCommand {
 
     public CmdGetData(CouplingApiMessage req) {

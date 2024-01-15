@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2021 Methics Oy. All rights reserved. 
-//
 package fi.methics.webapp.musaplink.util.db;
 
 import java.sql.Connection;

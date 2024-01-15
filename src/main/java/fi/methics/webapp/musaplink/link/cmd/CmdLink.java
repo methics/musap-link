@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.link.cmd;
 
 import java.util.UUID;
@@ -12,6 +9,10 @@ import fi.methics.webapp.musaplink.link.json.MusapLinkResp;
 import fi.methics.webapp.musaplink.util.CouplingCode;
 import fi.methics.webapp.musaplink.util.MusapException;
 
+
+/**
+ * Link API command for requesting new coupling code and linkid
+ */
 public class CmdLink extends LinkCommand<MusapLinkReq, MusapLinkResp> {
 
     public CmdLink(MusapLinkReq req) {

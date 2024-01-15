@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2020 Methics Oy. All rights reserved. 
-//
 package fi.methics.webapp.musaplink.link.json;
 
 import com.google.gson.annotations.SerializedName;

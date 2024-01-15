@@ -1,7 +1,3 @@
-//
-//(c) Copyright 2003-2023 Methics Technologies Oy. All rights reserved. 
-//
-
 package fi.methics.webapp.musaplink.util.push.datatype;
 
 import java.time.Instant;

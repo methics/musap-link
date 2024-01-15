@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.coupling.cmd;
 
 import fi.methics.webapp.musaplink.AccountStorage;
@@ -13,6 +10,9 @@ import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 
+/**
+ * Coupling API command for delivering a signature generation response to MUSAP Link
+ */
 public class CmdSignatureCallback extends CouplingCommand {
 
     public CmdSignatureCallback(CouplingApiMessage req) {

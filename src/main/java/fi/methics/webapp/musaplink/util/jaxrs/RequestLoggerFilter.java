@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2021 Methics Oy. All rights reserved. 
-//
 package fi.methics.webapp.musaplink.util.jaxrs;
 
 import java.io.BufferedInputStream;
@@ -21,8 +18,6 @@ import javax.ws.rs.ext.Provider;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.CharSource;
 import com.google.common.io.CharStreams;
 
 @Provider

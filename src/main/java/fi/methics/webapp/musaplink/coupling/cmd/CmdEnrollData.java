@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2022 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.coupling.cmd;
 
 import java.io.IOException;
@@ -13,6 +10,11 @@ import fi.methics.webapp.musaplink.coupling.json.EnrollDataReq;
 import fi.methics.webapp.musaplink.coupling.json.EnrollDataResp;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 
+/**
+ * Coupling API command for enrolling MUSAP to this MUSAP Link.
+ * 
+ * <p>This initializes transport security and push notification tokens.
+ */
 public class CmdEnrollData extends CouplingCommand {
 
     public CmdEnrollData(CouplingApiMessage req) {

@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.coupling.cmd;
 
 import java.util.HashMap;
@@ -22,6 +19,12 @@ import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Exception;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Response;
 
+/**
+ * Coupling API command for requesting a signature from an external service.
+ * 
+ * <p>Currently only supports ETSI TS 102 204 via SOAP.
+ * <br>TODO: Implement an interface to allow new services.
+ */
 public class CmdExternalSignature extends CouplingCommand {
 
     private static final Map<String, CouplingApiPayload> RESPONSES = new HashMap<>();

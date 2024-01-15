@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.link.cmd;
 
 import java.util.concurrent.Callable;
@@ -19,6 +16,9 @@ import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.SignatureCallback;
 import fi.methics.webapp.musaplink.util.push.PushClient;
 
+/**
+ * Link API command for a signature from MUSAP
+ */
 public class CmdSign extends LinkCommand<MusapSignReq, MusapSignResp> {
 
     public CmdSign(MusapSignReq req) {

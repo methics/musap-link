@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2022 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.coupling.json;
 
 import fi.methics.webapp.musaplink.link.json.MusapResp;

@@ -1,6 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Oy. All rights reserved.
-//
 package fi.methics.webapp.musaplink.link.cmd;
 
 import fi.methics.webapp.musaplink.AccountStorage;
@@ -11,6 +8,11 @@ import fi.methics.webapp.musaplink.link.json.MusapUpdateKeyReq;
 import fi.methics.webapp.musaplink.link.json.MusapUpdateKeyResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 
+/**
+ * Link API command for updating key data.
+ * 
+ * <p>The key data is kept local on MUSAP Link.
+ */
 public class CmdUpdateKey extends LinkCommand<MusapUpdateKeyReq, MusapUpdateKeyResp> {
 
     public CmdUpdateKey(MusapUpdateKeyReq req) {

@@ -1,7 +1,3 @@
-//
-//  (c) Copyright 2003-2023 Methics Technologies Oy. All rights reserved. 
-//
-
 package fi.methics.webapp.musaplink.util;
 
 import java.io.ByteArrayOutputStream;
