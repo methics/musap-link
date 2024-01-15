@@ -3,21 +3,29 @@
 MUSAP Link is an optional Java server component for the MUSAP library. MUSAP Link allows integrating the MUSAP library to external web services with a simple REST API.
 
 MUSAP library can be found here:
-* https://github.com/methics/musap-android
-* https://github.com/methics/musap-ios
+* [MUSAP Android](https://github.com/methics/musap-android)
+* [MUSAP iOS](https://github.com/methics/musap-ios)
 
-## Building
+## Features
+- **RESTful Integration**: MUSAP Link provides a straightforward REST API for seamless integration with external web services.
+- **External SSCD Integration**: MUSAP Link supports the ETSI TS 102 204 API for integrating external SSCDs.
+- **Push Notification Support**: MUSAP Link provides simple push notification integration, supporting both APNs and FCM.
+- **Database Compatibility**: Supports external databases, with recommended options being PostgreSQL or SQLite3.
+
+## Installation
+
+### Building
 
 MUSAP Link can be built with:
 
 `mvn package`
 
-## Database
+### Database
 
 MUSAP Link requires an external database. We recommend either PostgreSQL or SQLite3.
 The SQL schema can be found [here](https://github.com/methics/musap-link/blob/main/conf/musaplink.sql). 
 
-## Running
+## Usage
 
 We recommend running MUSAP with:
 
@@ -75,3 +83,7 @@ musaplink.db.username     = musap
 musaplink.db.password     = musap
 musaplink.db.driver.class = org.postgresql.Driver
 ```
+
+## License
+
+This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
