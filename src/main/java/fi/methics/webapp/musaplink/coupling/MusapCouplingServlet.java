@@ -19,6 +19,7 @@ import fi.methics.webapp.musaplink.coupling.cmd.CmdGenerateKeyCallback;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdGetData;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdLinkAccount;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdSignatureCallback;
+import fi.methics.webapp.musaplink.coupling.cmd.CmdUpdateData;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.MusapException;
@@ -70,6 +71,11 @@ public class MusapCouplingServlet {
                 case CouplingApiMessage.TYPE_ENROLLDATA: {
                     log.debug("Enrolling data");
                     jResp = new CmdEnrollData(jReq).execute();
+                    break;
+                }
+                case CouplingApiMessage.TYPE_UPDATEDATA: {
+                    log.debug("Updating data");
+                    jResp = new CmdUpdateData(jReq).execute();
                     break;
                 }
                 case CouplingApiMessage.TYPE_ERROR: {

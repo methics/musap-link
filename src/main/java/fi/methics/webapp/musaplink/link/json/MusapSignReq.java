@@ -6,7 +6,6 @@ package fi.methics.webapp.musaplink.link.json;
 import com.google.gson.annotations.SerializedName;
 
 import fi.methics.webapp.musaplink.coupling.json.SignatureReq;
-import fi.methics.webapp.musaplink.coupling.json.SignatureReq.Key;
 
 /**
  * MUSAP Link API /sign request

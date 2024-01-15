@@ -3,7 +3,7 @@
 //
 package fi.methics.webapp.musaplink.link.json;
 
-import fi.methics.json.GsonMessage;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 
 /**
  * MUSAP Link API request base

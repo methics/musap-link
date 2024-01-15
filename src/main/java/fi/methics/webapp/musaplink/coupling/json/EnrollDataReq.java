@@ -5,7 +5,7 @@ package fi.methics.webapp.musaplink.coupling.json;
 
 import com.google.gson.annotations.SerializedName;
 
-import fi.methics.json.GsonMessage;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 
 /**
  * MUSAP Enroll Data request payload
@@ -17,9 +17,6 @@ public class EnrollDataReq extends CouplingApiPayload {
     
     @SerializedName("apnstoken")
     public String apnstoken;
-    
-    @SerializedName("transid")
-    public String transid;
     
     // This is always encrypted
     @SerializedName("tokendata")

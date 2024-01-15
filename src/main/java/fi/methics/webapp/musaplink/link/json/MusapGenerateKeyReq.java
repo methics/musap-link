@@ -15,14 +15,8 @@ public class MusapGenerateKeyReq extends MusapReq {
     @SerializedName("linkid")
     public String linkid;
 
-    @SerializedName("keyname")
-    public String keyname;
-
-    @SerializedName("keyusage")
-    public String keyusage;
-
-    @SerializedName("keyalgorithm")
-    public String keyalgorithm;
+    @SerializedName("key")
+    public Key key;
     
     public transient String transid;
     
@@ -32,10 +26,23 @@ public class MusapGenerateKeyReq extends MusapReq {
         req.display = this.display;
         req.linkid  = this.linkid;
         req.key = new SignatureReq.Key();
-        req.key.keyname   = this.keyname;
-        req.key.keyusage  = this.keyusage;
-        req.key.algorithm = this.keyalgorithm;
+        req.key.keyname   = this.key.keyname;
+        req.key.keyusage  = this.key.keyusage;
+        req.key.algorithm = this.key.keyalgorithm;
         return req;
     }
+    public static class Key {
+        
+        @SerializedName("keyalgorithm")
+        public String keyalgorithm;
+        
+        @SerializedName("keyname")
+        public String keyname;
+
+        @SerializedName("keyusage")
+        public String keyusage;
+        
+    }
+    
     
 }

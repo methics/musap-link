@@ -6,18 +6,17 @@ package fi.methics.webapp.musaplink.coupling.json;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * MUSAP Enroll Data response payload
+ * MUSAP Update Data response payload
  */
-public class EnrollDataResp extends CouplingApiPayload {
-
+public class UpdateDataResp extends CouplingApiPayload {
 
     @SerializedName("musapid")
     public String musapid;
     
-    public EnrollDataResp() { 
+    public UpdateDataResp() { 
         this.status = "success";
     }
-    public static EnrollDataResp fromJson(final String str) {
-        return GSON.fromJson(str, EnrollDataResp.class);
+    public static UpdateDataResp fromJson(final String str) {
+        return GSON.fromJson(str, UpdateDataResp.class);
     }
 }

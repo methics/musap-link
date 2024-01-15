@@ -48,6 +48,7 @@ public class CouplingApiMessage extends GsonMessage {
     private static final Log log = LogFactory.getLog(CouplingApiMessage.class);
 
     public static final String TYPE_ENROLLDATA         = "enrolldata";
+    public static final String TYPE_UPDATEDATA         = "updatedata";
     public static final String TYPE_LINKACCOUNT        = "linkaccount";
     public static final String TYPE_GETDATA            = "getdata";
     public static final String TYPE_ERROR              = "error";

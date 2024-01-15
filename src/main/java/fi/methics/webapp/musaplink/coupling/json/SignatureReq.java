@@ -5,7 +5,7 @@ package fi.methics.webapp.musaplink.coupling.json;
 
 import com.google.gson.annotations.SerializedName;
 
-import fi.methics.json.GsonMessage;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 
 /**
  * MUSAP Coupling API Signature Request.

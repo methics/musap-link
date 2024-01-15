@@ -7,7 +7,7 @@ package fi.methics.webapp.musaplink.util.push.datatype;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.SerializedName;
 
-import fi.methics.json.GsonMessage;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 
 
 /**

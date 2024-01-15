@@ -60,8 +60,7 @@ public class ApnsConfig {
         this.keyId           = p.getProperty(prefix + "apns.keyid");
         this.signingkey      = p.getProperty(prefix + "apns.signingkey");
         this.overridePayload = p.getProperty(prefix + "apns.override.payload");
-        this.topic           = p.getProperty(prefix + "apns.default.topic", 
-                               p.getProperty(prefix + "apns.topic", "fi.methics.Alauda.PBY"));
+        this.topic           = p.getProperty(prefix + "apns.topic");
         
         this.debugEnable  = Boolean.getBoolean(p.getProperty(prefix + "apns.debug"));  
         this.traceEnable  = Boolean.getBoolean(p.getProperty(prefix + "apns.trace"));
