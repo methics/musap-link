@@ -13,6 +13,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client;
+import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client.ClientType;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204ClientBuilder;
 import fi.methics.webapp.musaplink.util.push.ApnsConfig;
 import fi.methics.webapp.musaplink.util.push.FcmConfig;
@@ -128,26 +129,42 @@ public class MusapLinkConf {
                 
                 String apid         = this.properties.getProperty(PREFIX + "client.apid."  + i);
                 String appwd        = this.properties.getProperty(PREFIX + "client.appwd." + i);
+                String restPassword = this.properties.getProperty(PREFIX + "client.restpassword." + i);
+                String restApiKey   = this.properties.getProperty(PREFIX + "client.restapikey." + i);
+                
                 String signatureurl = this.properties.getProperty(PREFIX + "client.signatureurl." + i);
                 String statusurl    = this.properties.getProperty(PREFIX + "client.statusurl." + i);
                 String receipturl   = this.properties.getProperty(PREFIX + "client.receipturl." + i);
                 String profileurl   = this.properties.getProperty(PREFIX + "client.profileurl." + i);
+                String resturl      = this.properties.getProperty(PREFIX + "client.resturl." + i);
                 
                 String keystoreFile = this.properties.getProperty(PREFIX + "client.keystore." + i);
                 String keystorePwd  = this.properties.getProperty(PREFIX + "client.keystore.pwd." + i);
                 String keystoreType = this.properties.getProperty(PREFIX + "client.keystore.type." + i);
 
+                String sigProfile     = this.properties.getProperty(PREFIX + "signature.profile." + i, Etsi204Client.SIGPROF_ALAUDA_SIGN);
+                boolean enableNospam  = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.nospam.enabled" + i));
+                boolean enableEventid = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.eventid.enabled." + i));
+
+                ClientType clientType = ClientType.fromString(this.properties.getProperty(PREFIX + "client.type." + i));
                 
                 clients.add(new Etsi204ClientBuilder(clientid, sscdtype)
                         .withApid(apid)
                         .withApPwd(appwd)
+                        .withRestPassword(restPassword)
+                        .withRestApiKey(restApiKey)
                         .withSignatureUrl(signatureurl)
                         .withStatusUrl(statusurl)
                         .withReceiptUrl(receipturl)
                         .withProfileUrl(profileurl)
+                        .withRestUrl(resturl)
+                        .withSignatureProfile(sigProfile)
                         .withKeystoreFile(keystoreFile)
                         .withKeystorePwd(keystorePwd)
                         .withKeystoreType(keystoreType)
+                        .withEventIdEnabled(enableEventid)
+                        .withNospamEnabled(enableNospam)
+                        .withClientType(clientType)
                         .build());
             } catch (Exception e) {
                 log.error("Failed to initialize client", e);
@@ -235,6 +252,14 @@ public class MusapLinkConf {
         } catch (NumberFormatException e) {
             return 600;
         }
+    }
+
+    /**
+     * Is the ListKeys MUSAP Link operation enabled? Default is false.
+     * @return true if ListKeys is enabled.
+     */
+    public boolean isListKeysEnabled() {
+        return Boolean.valueOf(this.properties.getProperty(PREFIX + "listkeys.enabled", "false"));
     }
     
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
+import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiPayload;
@@ -37,31 +38,23 @@ public class CmdExternalSignature extends CouplingCommand {
     public CouplingApiMessage execute() throws Exception {
         
         CouplingApiMessage req = this.getRequest();
-        String  musapid = req.musapid;
+        String musapid = req.musapid;
         
         MusapLinkAccount account = AccountStorage.findByMusapId(musapid);
         if (account == null) throw new MusapException(MusapResp.ERROR_UNKNOWN_USER);
 
         ExternalSignatureReq sigReq = this.getRequestPayload();
+        String transid = sigReq.transid;
+        
         
         // Check if this was a poll request
-        if (sigReq.transid != null) {
-            log.info("Got an external signature poll request from MUSAP ID " + musapid);
-            log.debug("Searching for a transaction with transid " + sigReq.transid);
-            CouplingApiPayload payload = this.pollSignature(sigReq.transid);
-            
-            if (payload == null) {
-                log.error("No transaction found with transid " + sigReq.transid);
-                return req.createErrorResponse(MusapErrorMsg.ERROR_INVALID_REQ);
-            }
-            log.info("Found transaction with payload " + payload);
-            return req.createResponse(payload);
-        } else {
-            log.info("Got external signature request from MUSAP ID " + musapid);
-        }
+        if (transid != null) {
+            return this.poll(req, transid);
+        } 
         
         // Generate new transid for future use
         sigReq.transid = IdGenerator.generateTxnId();
+        log.info("Got external signature request from MUSAP ID " + musapid);
         log.debug("Created a new transaction with transid " + sigReq.transid);
         Etsi204Client client = this.getConfig().getClient(sigReq.clientid);
         
@@ -71,12 +64,31 @@ public class CmdExternalSignature extends CouplingCommand {
             throw new MusapException(MusapResp.ERROR_INTERNAL);
         }
         
-        this.sendRequest(client, req, sigReq);
+        this.sendRequest(account, client, req, sigReq);
         
         ExternalSignatureResp statusResp = new ExternalSignatureResp();
         statusResp.transid = sigReq.transid;
         statusResp.status  = "pending";
         return req.createResponse(statusResp);
+    }
+    
+    /**
+     * Poll for a response for given transaction
+     * @param req     Coupling API request
+     * @param transid Signature transaction id
+     * @return Signature Request or null
+     */
+    private CouplingApiMessage poll(CouplingApiMessage req, String transid) {
+        log.info("Got an external signature poll request from MUSAP ID " + req.musapid);
+        log.debug("Searching for a transaction with transid " + transid);
+        CouplingApiPayload payload = RESPONSES.get(transid);
+        
+        if (payload == null) {
+            log.error("No transaction found with transid " + transid);
+            return null;
+        }
+        log.info("Found transaction with payload " + payload);
+        return req.createResponse(payload);
     }
     
     /**
@@ -86,7 +98,7 @@ public class CmdExternalSignature extends CouplingCommand {
      * @param sigReq Raw External Signature request
      * @throws Etsi204Exception
      */
-    private void sendRequest(Etsi204Client client, CouplingApiMessage req, ExternalSignatureReq sigReq) throws Etsi204Exception {
+    private void sendRequest(MusapLinkAccount account, Etsi204Client client, CouplingApiMessage req, ExternalSignatureReq sigReq) throws Etsi204Exception {
         
         String transid = sigReq.transid;
         if (transid == null) {
@@ -100,12 +112,20 @@ public class CmdExternalSignature extends CouplingCommand {
             
             log.debug("Sending signature request to clientid=" + sigReq.clientid + ", msisdn=" + msisdn);
             try {
-                Etsi204Response resp = client.sign(msisdn, dtbd, sigReq.getDtbs());
+                Etsi204Response resp = client.sign(msisdn, dtbd, sigReq.getDtbs(), transid);
                 
                 ExternalSignatureResp sigResp = new ExternalSignatureResp();
-                sigResp.signature = resp.getSignatureB64();
-                sigResp.status    = "success";
-                sigResp.transid   = transid;
+                sigResp.signature   = resp.getSignatureB64();
+                try {
+                    sigResp.publickey   = resp.getPublicKeyB64();
+                    sigResp.certificate = resp.getCertificateB64();
+                } catch (Exception e) {
+                    log.warn("Failed to parse certificate from response", e);
+                }
+                sigResp.status  = "success";
+                sigResp.transid = transid;
+                sigResp.keyid   = sigReq.keyid;
+                AccountStorage.upsertKeyDetails(account, new MusapKey(sigResp));
                 
                 log.debug("Got signature response for " + sigResp.transid);
                 RESPONSES.put(transid, sigResp);
@@ -119,8 +139,4 @@ public class CmdExternalSignature extends CouplingCommand {
 
     }
 
-    private CouplingApiPayload pollSignature(String transid) {
-        return RESPONSES.get(transid);
-    }
-    
 }

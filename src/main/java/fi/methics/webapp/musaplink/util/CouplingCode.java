@@ -19,6 +19,12 @@ import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
 
+/**
+ * Class representing a Coupling Code.
+ * 
+ * A Coupling Code is generated in {@link CmdLink} and held in a database for a short period of time.
+ * User must input the coupling code in their MUSAP app in order to bind their MUSAP app to this MUSAP Link.
+ */
 public class CouplingCode {
 
     public static final String BASE64_URL_MARKER = "data:image/png;base64,";

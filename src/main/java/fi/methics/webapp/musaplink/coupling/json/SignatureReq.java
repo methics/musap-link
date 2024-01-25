@@ -1,5 +1,7 @@
 package fi.methics.webapp.musaplink.coupling.json;
 
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 
 import fi.methics.webapp.musaplink.util.GsonMessage;
@@ -16,9 +18,10 @@ import fi.methics.webapp.musaplink.util.GsonMessage;
  */
 public class SignatureReq extends CouplingApiPayload {
 
-    public static final String MODE_SIGN = "sign";
-    public static final String MODE_GENSIGN = "generate-sign";
-    public static final String MODE_GENONLY = "generate-only";
+    public static final String MODE_SIGN       = "sign";
+    public static final String MODE_SIGNCHOICE = "sign-choice";
+    public static final String MODE_GENSIGN    = "generate-sign";
+    public static final String MODE_GENONLY    = "generate-only";
     
     @SerializedName("mode")
     public String mode = MODE_SIGN;
@@ -34,6 +37,10 @@ public class SignatureReq extends CouplingApiPayload {
 
     @SerializedName("key")
     public Key key;
+    
+    // For mode sign-choice
+    @SerializedName("datachoice")
+    public List<DTBS> datachoice;
     
     public transient String transid;
     
@@ -53,6 +60,16 @@ public class SignatureReq extends CouplingApiPayload {
 
         @SerializedName("algorithm")
         public String algorithm;
+    }
+    
+    public static class DTBS {
+        
+        @SerializedName("data")
+        public String data;
+        
+        @SerializedName("key")
+        public Key key;
+        
     }
     
 }

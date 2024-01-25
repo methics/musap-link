@@ -5,7 +5,6 @@ import javax.ws.rs.core.Response;
 
 import fi.methics.webapp.musaplink.coupling.json.MusapErrorMsg;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
-
 public class MusapException extends WebApplicationException {
 
     private static final long serialVersionUID = 1L;
@@ -33,13 +32,18 @@ public class MusapException extends WebApplicationException {
         this.errorcode = errorcode;
     }
     
+    public MusapException(int errorcode, String msg) {
+        super(msg);
+        this.errorcode = errorcode;
+    }
+    
     public int getErrorCode() {
         return this.errorcode;
     }
     
     @Override
     public Response getResponse() {
-        return Response.serverError().entity(MusapResp.createError(this.getErrorCode()).toJson()).build();
+        return Response.serverError().entity(MusapResp.createError(this.getErrorCode(), this.getMessage()).toJson()).build();
     }
     
 }

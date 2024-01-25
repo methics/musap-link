@@ -25,13 +25,15 @@ public class Etsi204Exception extends Exception {
             } else {
                 this.errorCode = "900";
             }
-            this.errorMsg    = af.getFaultReasonText("en");
-            this.errorDetail = e.getMessage();
+            this.errorMsg = af.getFaultReasonText("en");
+        } else if (e instanceof IllegalArgumentException) {
+            this.errorCode = "101";
+            this.errorMsg  = "WRONG_PARAM";
         } else {
             this.errorCode = "900";
             this.errorMsg  = "INTERNAL_ERROR";
-            this.errorDetail = e.getMessage();
         }
+        this.errorDetail = e.getMessage();
     }
     
     public String getErrorCode() {
@@ -58,6 +60,7 @@ public class Etsi204Exception extends Exception {
                 case "105": error.errorcode = String.valueOf(MusapErrorMsg.ERROR_UNKNOWN_CLIENT); break;
                 case "208": error.errorcode = String.valueOf(MusapErrorMsg.ERROR_TIMED_OUT); break;
                 case "402": error.errorcode = String.valueOf(MusapErrorMsg.ERROR_PIN_BLOCKED); break;
+                case "406": error.errorcode = String.valueOf(MusapErrorMsg.ERROR_ALREADY_IN_PROGRESS); break;
                 case "780": error.errorcode = String.valueOf(MusapErrorMsg.ERROR_UNABLE_TO_PROVIDE); break;
                 default: error.errorcode = String.valueOf(MusapErrorMsg.ERROR_INTERNAL); break;
             }

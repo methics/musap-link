@@ -4,13 +4,17 @@ import com.google.gson.annotations.SerializedName;
 
 public class MusapUpdateKeyReq extends MusapReq {
 
-    @SerializedName("linkid")
-    public String linkid;
-    
     @SerializedName("keyid")
     public String keyid;
+
+    @SerializedName("oldkeyname")
+    public String oldKeyname;
     
-    @SerializedName("keyname")
-    public String keyname;
+    @SerializedName("linkid")
+    public String linkid;
+
+    @SerializedName(value="newkeyname", alternate="keyname")
+    public String newkeyname;
+
 
 }

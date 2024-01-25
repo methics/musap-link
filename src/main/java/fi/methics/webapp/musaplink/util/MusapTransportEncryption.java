@@ -18,8 +18,8 @@ public class MusapTransportEncryption {
     private static final Log log = LogFactory.getLog(MusapTransportEncryption.class);
 
     // List of message types that should not be encrypted or decrypted
-    private static final List<String> NO_ENCRYPT_TYPES = Arrays.asList(new String[]{ "verifyqr", "error", "retryotp" });
-    private static final List<String> NO_DECRYPT_TYPES = Arrays.asList(new String[]{ "verifyqr", "enrolldata", "retryotp"});
+    private static final List<String> NO_ENCRYPT_TYPES = Arrays.asList(new String[]{ });
+    private static final List<String> NO_DECRYPT_TYPES = Arrays.asList(new String[]{ "enrolldata" });
 
     private static final ExpirableMap<String, TransportKeys> EXP_MAP = new ExpirableMap<>(Interval.ofMinutes(10).toMillis());
     private static final Map<String, TransportKeys>          CACHE   = Collections.synchronizedMap(EXP_MAP);
@@ -52,8 +52,6 @@ public class MusapTransportEncryption {
 
     public MusapTransportEncryption(final MusapLinkConf config) {
         this.config = config;
-        
-        // APP-179: Set default cache time
         EXP_MAP.setDefaultTime(Interval.ofMinutes(10).toMillis());
     }
 
@@ -153,7 +151,6 @@ public class MusapTransportEncryption {
         }
         log.trace("Resolving transport keys for UUID " + uuid);
 
-        // APP-179: Cache keys
         final TransportKeys cached = CACHE.get(uuid);
         if (cached != null) {
             log.trace("Resolved transport keys from cache");

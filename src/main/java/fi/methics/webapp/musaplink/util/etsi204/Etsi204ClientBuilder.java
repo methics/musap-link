@@ -7,14 +7,21 @@ import javax.net.ssl.SSLSocketFactory;
 import javax.servlet.ServletException;
 
 import fi.laverca.etsi.EtsiClient;
+import fi.methics.laverca.rest.MssClient;
+import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client.ClientType;
 
 /**
- * ETSI TS 102 204 Client builder 
+ * ETSI TS 102 204 Client builder.
+ * This can be used to build both REST and SOAP clients.
  */
 public class Etsi204ClientBuilder {
 
     private String apid;
     private String appwd;
+    private String restApiKey;
+    private String restPasword;
+    
+    private String resturl;
     private String signatureurl;
     private String statusurl;
     private String receipturl;
@@ -26,6 +33,12 @@ public class Etsi204ClientBuilder {
     
     private String clientid;
     private String sscdtype;
+    
+    private ClientType clientType = ClientType.SOAP;
+    
+    private String signatureProfile;
+    private boolean enableNospamCode;
+    private boolean enableEventId;
     
     public Etsi204ClientBuilder(String clientid, String sscdtype) {
         this.clientid = clientid;
@@ -41,25 +54,39 @@ public class Etsi204ClientBuilder {
      */
     public Etsi204Client build() throws GeneralSecurityException, IOException {
 
-        // Setup SSL
-        SSLSocketFactory ssf = null;
-        System.out.println("Setting up ssl");
-        ssf = fi.laverca.mss.MssClient.createSSLFactory(this.keystoreFile,
-                                                        this.keystorePwd,
-                                                        this.keystoreType);
+        Etsi204Client result;
+        if (this.clientType == ClientType.SOAP) {
+            SSLSocketFactory ssf = fi.laverca.mss.MssClient.createSSLFactory(this.keystoreFile,
+                                                                             this.keystorePwd,
+                                                                             this.keystoreType);
 
-        // Create client
-        EtsiClient client = new EtsiClient(this.apid,           
-                                           this.appwd,          
-                                           this.signatureurl,   
-                                           this.statusurl,
-                                           this.receipturl,
-                                           null,
-                                           this.profileurl,
-                                           null);
-        
-        client.setSSLSocketFactory(ssf);
-        return new Etsi204Client(client, this.clientid, this.sscdtype);
+            EtsiClient client = new EtsiClient(this.apid,           
+                                               this.appwd,          
+                                               this.signatureurl,   
+                                               this.statusurl,
+                                               this.receipturl,
+                                               null,
+                                               this.profileurl,
+                                               null);
+            
+            client.setSSLSocketFactory(ssf);
+            result = new Etsi204SoapClient(client, this.clientid, this.sscdtype);
+        } else {
+            MssClient.Builder builder = new MssClient.Builder();
+            builder.withAppwd(this.appwd);
+            builder.withRestUrl(this.resturl);
+            if (this.restApiKey != null) {
+                builder.withApiKey(this.apid, this.restApiKey);
+            } else {
+                builder.withPassword(this.apid, this.restPasword);
+            }
+            builder.withAppwd(this.appwd);
+            result = new Etsi204RestClient(builder.build(), sscdtype, sscdtype);
+        }
+        result.setEventIdEnabled(this.enableEventId);
+        result.setNospamCodeEnabled(this.enableNospamCode);
+        result.setSignatureProfile(this.signatureProfile);
+        return result;
     }
     
     public Etsi204ClientBuilder withApid(String apid) {
@@ -69,6 +96,16 @@ public class Etsi204ClientBuilder {
 
     public Etsi204ClientBuilder withApPwd(String appwd) {
         this.appwd = appwd;
+        return this;
+    }
+
+    public Etsi204ClientBuilder withRestApiKey(String restApiKey) {
+        this.restApiKey = restApiKey;
+        return this;
+    }
+
+    public Etsi204ClientBuilder withRestPassword(String restPasword) {
+        this.restPasword = restPasword;
         return this;
     }
 
@@ -92,6 +129,11 @@ public class Etsi204ClientBuilder {
         return this;
     }
 
+    public Etsi204ClientBuilder withRestUrl(String resturl) {
+        this.resturl = resturl;
+        return this;
+    }
+
     public Etsi204ClientBuilder withKeystoreFile(String keystoreFile) {
         this.keystoreFile = keystoreFile;
         return this;
@@ -107,4 +149,23 @@ public class Etsi204ClientBuilder {
         return this;
     }
 
+    public Etsi204ClientBuilder withEventIdEnabled(boolean enabled) {
+        this.enableEventId = enabled;
+        return this;
+    }
+
+    public Etsi204ClientBuilder withNospamEnabled(boolean enabled) {
+        this.enableNospamCode = enabled;
+        return this;
+    }
+    
+    public Etsi204ClientBuilder withClientType(ClientType clientType) {
+        this.clientType = clientType;
+        return this;
+    }
+
+    public Etsi204ClientBuilder withSignatureProfile(String sigProfile) {
+        this.signatureProfile = sigProfile;
+        return this;
+    }
 }

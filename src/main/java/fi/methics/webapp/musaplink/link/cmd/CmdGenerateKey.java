@@ -7,6 +7,7 @@ import java.util.concurrent.TimeoutException;
 
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
+import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.link.LinkCommand;
 import fi.methics.webapp.musaplink.link.json.MusapGenerateKeyReq;
@@ -40,7 +41,16 @@ public class CmdGenerateKey extends LinkCommand<MusapGenerateKeyReq, MusapGenera
 
         log.info("Got /generatekey request for MUSAP with linkid " + linkid);
 
+        String keyname = jReq.key != null ? jReq.key.keyname : null;
+
+        if (keyname != null) {
+            if (AccountStorage.findKeyDetailsByKeyname(account, keyname) != null) {
+                throw new MusapException(MusapResp.ERROR_WRONG_PARAM, "Key with name " + keyname + " already exists");
+            }
+        }
+        
         SignatureCallback callback = TxnStorage.storeRequest(jReq.linkid, jReq.toSignReq());
+
         String transid = callback.getTransId();
         String message = jReq.display;
 
@@ -69,6 +79,11 @@ public class CmdGenerateKey extends LinkCommand<MusapGenerateKeyReq, MusapGenera
                 MusapGenerateKeyResp resp = new MusapGenerateKeyResp();
                 resp.publickey = signResp.publickey;
                 resp.linkid    = signResp.linkid;
+                
+                if (keyname != null) {
+                    log.debug("Updating keyname to " + keyname);
+                    AccountStorage.upsertKeyDetails(account, new MusapKey(signResp.keyid, keyname));
+                }
                 
                 log.info("Returning /generatekey response " + resp.toJson());
                 return resp;
