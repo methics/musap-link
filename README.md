@@ -6,6 +6,9 @@ MUSAP library can be found here:
 * [MUSAP Android](https://github.com/methics/musap-android)
 * [MUSAP iOS](https://github.com/methics/musap-ios)
 
+MUSAP Link API description can be found here:
+* [MUSAP API](https://github.com/methics/musap-api)
+
 ## Features
 - **RESTful Integration**: MUSAP Link provides a straightforward REST API for seamless integration with external web services.
 - **External SSCD Integration**: MUSAP Link supports the ETSI TS 102 204 API for integrating external SSCDs.
