@@ -4,7 +4,7 @@ import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Exception;
 
 /**
- * MUSAP App Error payload
+ * MUSAP Coupling API Error payload
  */
 public class MusapErrorMsg extends CouplingApiPayload {
 
@@ -24,10 +24,6 @@ public class MusapErrorMsg extends CouplingApiPayload {
     // Error response contents
     public String error;
     public String errorcode;
-    public String type;
-    
-    // Special property of WRONG_PIN error
-    public String attempts;
     
     public static MusapErrorMsg fromJson(final String str) {
         return GSON.fromJson(str, MusapErrorMsg.class);

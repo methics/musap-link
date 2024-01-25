@@ -247,7 +247,7 @@ public class CouplingApiMessage extends GsonMessage {
      * @param msg JSON to be used as payload
      */
     public CouplingApiMessage createErrorResponse(MusapErrorMsg msg) {
-        final CouplingApiMessage resp = newAppResponse(msg);
+        final CouplingApiMessage resp = newCouplingResponse(msg);
         resp.type    = TYPE_ERROR; // Change type!
         resp.isError = true;
         return resp;
@@ -260,7 +260,7 @@ public class CouplingApiMessage extends GsonMessage {
      * @param resp JSON to be used as payload
      */
     public CouplingApiMessage createResponse(final CouplingApiPayload resp) {
-        return newAppResponse(resp);
+        return newCouplingResponse(resp);
     }
     
     /**
@@ -268,22 +268,9 @@ public class CouplingApiMessage extends GsonMessage {
      * <p>Adds "status": "success" to the payload.
      */
     public CouplingApiMessage createSuccessResponse() {
-        
         final CouplingApiPayload resp = new CouplingApiPayload();
         resp.status = "success";
-
-        return newAppResponse(resp);
-    }
-    
-    /**
-     * Create a new WRONG PIN error response
-     * 
-     * @param attempts  Attempts as String (e.g. "1/3")
-     */
-    public CouplingApiMessage createWrongPinResponse(final String attempts) {
-        final MusapErrorMsg resp = this.createErrorPayload(MusapErrorMsg.ERROR_WRONG_PIN);
-        resp.attempts = attempts;
-        return createErrorResponse(resp);
+        return newCouplingResponse(resp);
     }
     
     /**
@@ -559,7 +546,7 @@ public class CouplingApiMessage extends GsonMessage {
         }
     }
 
-    private CouplingApiMessage newAppResponse(CouplingApiPayload msg) {
+    private CouplingApiMessage newCouplingResponse(CouplingApiPayload msg) {
         final CouplingApiMessage resp = new CouplingApiMessage();
         resp.type    = this.type;
         resp.transid = this.transid;

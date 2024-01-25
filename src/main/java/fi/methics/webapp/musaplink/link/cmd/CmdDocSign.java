@@ -7,9 +7,11 @@ import java.util.concurrent.TimeoutException;
 
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
-import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.TxnStorage;
+import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.link.LinkCommand;
+import fi.methics.webapp.musaplink.link.json.MusapDocSignReq;
+import fi.methics.webapp.musaplink.link.json.MusapDocSignReq.DTBS;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
@@ -18,17 +20,17 @@ import fi.methics.webapp.musaplink.util.SignatureCallback;
 import fi.methics.webapp.musaplink.util.push.PushClient;
 
 /**
- * Link API command for a signature from MUSAP
+ * Link API command for a document signature from MUSAP
  */
-public class CmdSign extends LinkCommand<MusapSignReq, MusapSignResp> {
+public class CmdDocSign extends LinkCommand<MusapDocSignReq, MusapSignResp> {
 
-    public CmdSign(MusapSignReq req) {
+    public CmdDocSign(MusapDocSignReq req) {
         super(req);
     }
     
     @Override
     public MusapSignResp execute() throws MusapException {
-        MusapSignReq jReq = this.getRequest();
+        MusapDocSignReq jReq = this.getRequest();
         if (jReq == null) throw new MusapException(MusapResp.ERROR_WRONG_PARAM);
 
         String linkid = jReq.linkid;
@@ -41,12 +43,17 @@ public class CmdSign extends LinkCommand<MusapSignReq, MusapSignResp> {
         log.info("Got /sign request for MUSAP with linkid " + linkid);
 
         // Resolve KeyID from keyname
-        if (jReq.key != null && jReq.key.keyname != null) {
-            String keyname = jReq.key.keyname;
-            MusapKey key   = AccountStorage.findKeyDetailsByKeyname(account, keyname);
-            if (key != null && key.keyid != null) {
-                log.debug("Resolved keyid: " + key.keyid + " from keyname: " + keyname);
-                jReq.key.keyid = key.keyid;
+        if (jReq.datachoice == null) {
+            throw new MusapException(MusapResp.ERROR_MISSING_PARAM);
+        }
+        for (DTBS dtbs : jReq.datachoice) {
+            if (dtbs.key != null && dtbs.key.keyname != null) {
+                String keyname = dtbs.key.keyname;
+                MusapKey key   = AccountStorage.findKeyDetailsByKeyname(account, keyname);
+                if (key != null && key.keyid != null) {
+                    log.debug("Resolved keyid: " + key.keyid + " from keyname: " + keyname);
+                    dtbs.key.keyid = key.keyid;
+                }
             }
         }
         

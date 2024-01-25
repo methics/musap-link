@@ -15,6 +15,7 @@ import java.util.TimerTask;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.link.MusapLinkServlet;
 import fi.methics.webapp.musaplink.util.CouplingCode;
 import fi.methics.webapp.musaplink.util.MusapException;
@@ -41,10 +42,13 @@ public class AccountStorage extends MusapDb {
     private static final String SELECT_ACCOUNT       = "SELECT musapid, fcmtoken, apnstoken FROM musap_accounts WHERE musapid=?";
     private static final String LIST_ACCOUNTS        = "SELECT musapid, fcmtoken, apnstoken FROM musap_accounts";
     
-    private static final String INSERT_KEYDETAILS    = "INSERT INTO key_details (musapid, keyid, keyname) VALUES (?,?,?)";
-    private static final String UPDATE_KEYDETAILS    = "UPDATE key_details SET (keyname) VALUES (?,?,?) WHERE musapid=? AND keyid=?";
-    private static final String SELECT_KEYDETAILS    = "SELECT keyid FROM key_details WHERE musapid=? AND keyname=?";
-    
+    private static final String INSERT_KEYDETAILS         = "INSERT INTO key_details (musapid, keyid, keyname, certificate, publickey) VALUES (?,?,?,?,?)";
+    private static final String UPDATE_KEYDETAILS         = "UPDATE key_details SET keyname=?, certificate=?, publickey=?, modified_dt=? WHERE musapid=? AND keyid=?";
+    private static final String UPDATE_KEYDETAILS_BY_NAME = "UPDATE key_details SET keyname=?, certificate=?, publickey=?, modified_dt=? WHERE musapid=? AND keyname=?";
+    private static final String SELECT_KEYDETAILS         = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=? AND keyname=?";
+    private static final String SELECT_KEYDETAILS_BY_ID   = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=? AND keyid=?";
+    private static final String LIST_KEYDETAILS           = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=?";
+
     private static final String SELECT_MUSAPID_BY_LINKID   = "SELECT musapid FROM link_ids WHERE linkid=?";
     private static final String SELECT_LINKIDS_BY_MUSAPID  = "SELECT linkid  FROM link_ids WHERE musapid=?";
 
@@ -60,7 +64,7 @@ public class AccountStorage extends MusapDb {
             return;
         }
         
-        String name = null; // TODO
+        String name = null;
         
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(INSERT_LINKID))
@@ -133,7 +137,7 @@ public class AccountStorage extends MusapDb {
                     account.musapid = result.getString(1);
                     account.fcmToken = result.getString(2);
                     account.apnsToken = result.getString(3);
-                    account.linkids = new HashSet<>(getLinkIds(musapid));
+                    account.linkids = new HashSet<>(listLinkIds(musapid));
                     return account;
                 }
             }
@@ -172,10 +176,42 @@ public class AccountStorage extends MusapDb {
     /**
      * Get KeyID based on the given keyname
      * @param account MUSAP account
+     * @param keyid Key name
+     * @return KeyID or null if not found
+     */
+    public static MusapKey findKeyDetailsByKeyID(MusapLinkAccount account, String keyid) {
+        if (account == null) return null;
+        if (keyid   == null) return null;
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(SELECT_KEYDETAILS_BY_ID))
+        {
+            ps.setString(1, account.musapid);
+            ps.setString(2, keyid);
+            try (ResultSet result = ps.executeQuery()) {
+                if (result.next()) {
+                    MusapKey key = new MusapKey();
+                    key.keyid       = result.getString(1);
+                    key.keyname     = result.getString(2);
+                    key.certificate = result.getBytes(3);
+                    key.publickey   = result.getBytes(4);
+                    return key;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed get MUSAP account", e);
+            throw new MusapException(e);
+        }
+        return null;
+    }
+
+    /**
+     * Get KeyID based on the given keyname
+     * @param account MUSAP account
      * @param keyname Key name
      * @return KeyID or null if not found
      */
-    public static String getKeyId(MusapLinkAccount account, String keyname) {
+    public static MusapKey findKeyDetailsByKeyname(MusapLinkAccount account, String keyname) {
         if (account == null) return null;
         if (keyname == null) return null;
         
@@ -183,10 +219,15 @@ public class AccountStorage extends MusapDb {
              PreparedStatement ps = conn.prepareStatement(SELECT_KEYDETAILS))
         {
             ps.setString(1, account.musapid);
-            ps.setString(2,  keyname);
+            ps.setString(2, keyname);
             try (ResultSet result = ps.executeQuery()) {
                 if (result.next()) {
-                    return result.getString(1);
+                    MusapKey key = new MusapKey();
+                    key.keyid       = result.getString(1);
+                    key.keyname     = result.getString(2);
+                    key.certificate = result.getBytes(3);
+                    key.publickey   = result.getBytes(4);
+                    return key;
                 }
             }
         } catch (SQLException e) {
@@ -196,7 +237,12 @@ public class AccountStorage extends MusapDb {
         return null;
     }
     
-    public static List<String> getLinkIds(String musapid) {
+    /**
+     * List all LinkIDs related to given MUSAP ID
+     * @param musapid MUSAP ID
+     * @return List of LinkIDs
+     */
+    public static List<String> listLinkIds(String musapid) {
         List<String> linkids = new ArrayList<>();
         try (Connection conn = getConnection();
              PreparedStatement ps = conn.prepareStatement(SELECT_LINKIDS_BY_MUSAPID))
@@ -214,6 +260,10 @@ public class AccountStorage extends MusapDb {
         return linkids;
     }
     
+    /**
+     * List all stored MUSAP accounts
+     * @return MUSAP accounts
+     */
     public static Collection<MusapLinkAccount> listAccounts() {
         
         List<MusapLinkAccount> accounts = new ArrayList<>();
@@ -227,7 +277,7 @@ public class AccountStorage extends MusapDb {
                     account.musapid = result.getString(1);
                     account.fcmToken = result.getString(2);
                     account.apnsToken = result.getString(3);
-                    account.linkids = new HashSet<>(getLinkIds(account.musapid));
+                    account.linkids = new HashSet<>(listLinkIds(account.musapid));
                     accounts.add(account);
                 }
             }
@@ -236,6 +286,36 @@ public class AccountStorage extends MusapDb {
             throw new MusapException(e);
         }
         return accounts;
+    }
+    
+    /**
+     * List key details for a MUSAP account. Note that this returns nothing if ListKeys is not enabled in configuration.
+     * @param account MUSAP Account whose keys to list
+     * @return List of key details
+     */
+    public static Collection<MusapKey> listKeyDetails(MusapLinkAccount account) {
+        List<MusapKey> keys = new ArrayList<>();
+        
+        try (Connection conn = getConnection();
+             PreparedStatement ps = conn.prepareStatement(LIST_KEYDETAILS))
+        {
+            ps.setString(1,  account.musapid);
+            try (ResultSet result = ps.executeQuery()) {
+                if (result.next()) {
+                    MusapKey key = new MusapKey();
+                    key.keyid       = result.getString(1);
+                    key.keyname     = result.getString(2);
+                    key.certificate = result.getBytes(3);
+                    key.publickey   = result.getBytes(4);
+                    keys.add(key);
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed get MUSAP ID", e);
+            throw new MusapException(e);
+        }
+        return keys;
+        
     }
     
     /**
@@ -280,7 +360,7 @@ public class AccountStorage extends MusapDb {
         }, interval, interval);
         return timer;
     }
-    
+
     /**
      * Store a MUSAP account
      * @param account New account
@@ -304,7 +384,6 @@ public class AccountStorage extends MusapDb {
             throw new MusapException(e);
         }
     }
-
     /**
      * Update a MUSAP account
      * @param musapid MUSAP ID
@@ -328,34 +407,63 @@ public class AccountStorage extends MusapDb {
             throw new MusapException(e);
         }
     }
+    
     /**
-     * Store a MUSAP account
-     * @param account New account
+     * Update or insert key details
+     * @param account Related MUSAP account
+     * @param key Key details to update or insert
      */
-    public static void upsertKeyDetails(MusapLinkAccount account, String keyname, String keyid) {
+    public static void upsertKeyDetails(MusapLinkAccount account, MusapKey key) {
         if (account == null || account.musapid == null) {
             log.error("Ignoring account with null musapid");
             return;
         }
-        if (keyname == null || keyid == null) return;
+        if (key == null || key.keyid == null) {
+            log.debug("Skipping key update: keyid is null");
+            return;
+        }
+        String keyname = key.keyname;
+        String keyid   = key.keyid;
+
+        if (!MusapLinkConf.getInstance().isListKeysEnabled()) {
+            // Do not store cert or public key if list keys is not enabled
+            key.certificate = null;
+            key.publickey   = null;
+        }
         
-        if (getKeyId(account, keyname) != null) {
+        MusapKey oldKey = findKeyDetailsByKeyname(account, keyname);
+        if (oldKey == null) {
+            oldKey = findKeyDetailsByKeyID(account, keyid);
+        }
+        
+        if (oldKey != null) {
+            if (key.keyname     == null) key.keyname     = oldKey.keyname;
+            if (key.certificate == null) key.certificate = oldKey.certificate;
+            if (key.publickey   == null) key.publickey   = oldKey.publickey;
+        
+            if (oldKey.equals(key)) {
+                // Keys equal already
+                log.debug("Keys are equal. Not updating.");
+                return;
+            }
             
             // Update
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(UPDATE_KEYDETAILS))
                {
-                   ps.setString(1, keyname);
-                   ps.setString(2, account.musapid);
-                   ps.setString(3, keyid);
+                   ps.setString(1, key.keyname);
+                   ps.setBytes(2,  key.certificate);
+                   ps.setBytes(3,  key.publickey);
+                   ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
+                   ps.setString(5, account.musapid);
+                   ps.setString(6, keyid);
                    ps.executeUpdate();
-                   log.debug("Updated keyname to " + keyname + " (keyid=" + keyid + ")");
+                   log.debug("Updated key details for keyid " + keyid);
                } catch (SQLException e) {
                    log.error("Failed insert MUSAP account", e);
                    throw new MusapException(e);
                }
         } else {
-            
             // Insert
             try (Connection conn = getConnection();
                  PreparedStatement ps = conn.prepareStatement(INSERT_KEYDETAILS))
@@ -363,8 +471,10 @@ public class AccountStorage extends MusapDb {
                 ps.setString(1, account.musapid);
                 ps.setString(2, keyid);
                 ps.setString(3, keyname);
+                ps.setBytes(4, key.certificate);
+                ps.setBytes(5, key.publickey);
                 ps.executeUpdate();
-                log.debug("Inserted keyname " + keyname + " for keyid " + keyid);
+                log.debug("Inserted key details for keyid " + keyid);
             } catch (SQLException e) {
                 log.error("Failed insert MUSAP account", e);
                 throw new MusapException(e);

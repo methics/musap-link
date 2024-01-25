@@ -11,7 +11,7 @@ public class MusapSignReq extends MusapReq {
 
     @SerializedName("data")
     public String data;
-
+    
     @SerializedName("display")
     public String display = "Sign with MUSAP";
     
@@ -45,6 +45,7 @@ public class MusapSignReq extends MusapReq {
             req.key.keyname   = this.key.keyname;
             req.key.keyusage  = this.key.keyusage;
             req.key.publickeyhash = this.key.publickeyhash;
+            req.key.algorithm = this.key.algorithm;
         }
         
         if (this.generatenew != null && this.generatenew.booleanValue()) {
@@ -71,6 +72,9 @@ public class MusapSignReq extends MusapReq {
 
         @SerializedName("keyusage")
         public String keyusage;
+
+        @SerializedName(value="algorithm", alternate="keyalgorithm")
+        public String algorithm;
         
     }
     

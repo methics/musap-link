@@ -22,16 +22,19 @@ public class MusapGenerateKeyReq extends MusapReq {
         req.mode    = SignatureReq.MODE_GENONLY;
         req.display = this.display;
         req.linkid  = this.linkid;
-        req.key = new SignatureReq.Key();
-        req.key.keyname   = this.key.keyname;
-        req.key.keyusage  = this.key.keyusage;
-        req.key.algorithm = this.key.keyalgorithm;
+        
+        if (this.key != null) {
+            req.key = new SignatureReq.Key();
+            req.key.keyname   = this.key.keyname;
+            req.key.keyusage  = this.key.keyusage;
+            req.key.algorithm = this.key.algorithm;
+        }
         return req;
     }
     public static class Key {
         
-        @SerializedName("keyalgorithm")
-        public String keyalgorithm;
+        @SerializedName(value="algorithm", alternate="keyalgorithm")
+        public String algorithm;
         
         @SerializedName("keyname")
         public String keyname;

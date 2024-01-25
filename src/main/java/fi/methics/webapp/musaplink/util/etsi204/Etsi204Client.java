@@ -1,56 +1,64 @@
 package fi.methics.webapp.musaplink.util.etsi204;
 
-import java.util.Collections;
-import java.util.UUID;
-
-import fi.laverca.etsi.EtsiClient;
-import fi.laverca.etsi.EtsiRequest;
-import fi.laverca.jaxb.mss.MessagingModeType;
-import fi.laverca.util.DTBS;
-
 /**
  * ETSI TS 102 204 signature client
  */
-public class Etsi204Client {
+public abstract class Etsi204Client {
     
-    private EtsiClient client; // Laverca client
-    private String sscdid;
-    private String sscdtype;
-
-    protected Etsi204Client(EtsiClient client, String sscdid, String sscdtype) {
-        this.client   = client;
+    public static final String SIGPROF_ALAUDA_AUTHN = "http://alauda.mobi/digitalSignature";
+    public static final String SIGPROF_ALAUDA_SIGN  = "http://alauda.mobi/nonRepudiation";
+    
+    protected String sscdid;
+    protected String sscdtype;
+    
+    protected boolean enableNoSpamCode;
+    protected boolean enableEventId;
+    
+    protected String signatureProfile;
+    
+    protected Etsi204Client(String sscdid, String sscdtype) {
         this.sscdid   = sscdid;
         this.sscdtype = sscdtype;
+    }
+    
+    public void setEventIdEnabled(boolean enabled) {
+        this.enableEventId = enabled;
+    }
+
+    public void setNospamCodeEnabled(boolean enabled) {
+        this.enableNoSpamCode = enabled;
+    }
+    
+    /**
+     * Get the SignatureProfile to be used
+     * @return SignatureProfile. Default is {@link #SIGPROF_ALAUDA_SIGN}.
+     */
+    public String getSignatureProfile() {
+        return this.signatureProfile;
+    }
+    
+    /**
+     * Set the default SignatureProfile to be used
+     * @param sigprof Signature Profile
+     */
+    public void setSignatureProfile(String sigprof) {
+        this.signatureProfile = sigprof;
     }
     
     /**
      * Send a SignatureRequest to MSSP
      * @param msisdn  MSISDN
      * @param dtbd DTBS
+     * @param dtbs DTBD
+     * @param transid Transaction ID (may be used as EventID)
      * @return Signature response
      * @throws Etsi204Exception
      */
-    public Etsi204Response sign(final String msisdn, 
-                                final String dtbd,
-                                final byte[] dtbs) 
-        throws Etsi204Exception
-    {
-        
-        try {
-            String    apTransId = "A" + UUID.randomUUID().toString();
-            EtsiRequest soapReq = this.client.createRequest(apTransId, 
-                                                            msisdn,
-                                                            new DTBS(dtbs, "BASE64", "application/octet-stream"),
-                                                            null,
-                                                            Collections.emptyList(),
-                                                            "http://alauda.mobi/digitalSignature", 
-                                                            null,
-                                                            MessagingModeType.SYNCH);
-            return new Etsi204Response(this.client.send(soapReq));
-        } catch (Exception e) {
-            throw new Etsi204Exception(e);
-        }
-    }
+    public abstract Etsi204Response sign(String msisdn, 
+                                         String dtbd,
+                                         byte[] dtbs,
+                                         String transid) 
+        throws Etsi204Exception;
     
     public String getClientId() {
         return this.sscdid;
@@ -58,6 +66,23 @@ public class Etsi204Client {
     
     public String getSscdType() {
         return this.sscdtype;
+    }
+    
+    public static enum ClientType {
+        REST("rest"),
+        SOAP("soap");
+        String type;
+        private ClientType(String type) {
+            this.type = type;
+        }
+        
+        public static ClientType fromString(String type) {
+            if (type == null) return SOAP;
+            switch (type.toLowerCase()) {
+            case "rest": return REST;
+            default: return SOAP;
+            }
+        }
     }
     
 }

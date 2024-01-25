@@ -27,28 +27,71 @@ public class MusapResp extends GsonMessage {
     public static final int ERROR_SSCD_UNREACHABLE   = 404;
     public static final int ERROR_COUPLING_ERROR     = 405;
     public static final int ERROR_INTERNAL           = 900;
-    
+    public static final int ERROR_CONFIGURATION      = 901;
+
     @SerializedName("errorcode")
     public Integer errorcode;
 
     @SerializedName("errorname")
     public String errorname;
+
+    @SerializedName("errordetails")
+    public String errordetails;
     
     public MusapResp() {
         
     }
+
+    /**
+     * Convert this object to a JAX-RS Response
+     * <p>Errors will have status code 500 and others 200.
+     * @return {@link Response}
+     */
+    public Response toResponse() {
+        if (this.errorcode != null) {
+            return Response.status(Status.INTERNAL_SERVER_ERROR).entity(this.toJson()).build();
+        } else {
+            return Response.ok().entity(this.toJson()).build();
+        }
+    }
     
-    public static MusapResp createError(int errorcode) {
+    /**
+     * Create an error response
+     * @param errorcode Error code
+     * @param msg Error details
+     * @return error
+     */
+    public static MusapResp createError(int errorcode, String msg) {
         MusapResp resp = new MusapResp();
         resp.errorcode = errorcode;
         resp.errorname = resp.getErrorName(errorcode);
+        resp.errordetails = msg;
         return resp;
     }
     
+    /**
+     * Create an error response
+     * @param errorcode Error code
+     * @return error
+     */
+    public static MusapResp createError(int errorcode) {
+        return createError(errorcode, null);
+    }
+    
+    /**
+     * Create a JAX-RS Response
+     * @param errorcode Error code
+     * @return Response
+     */
     public static Response createErrorResponse(int errorcode) {
         return Response.status(Status.INTERNAL_SERVER_ERROR).entity(MusapResp.createError(errorcode)).build();
     }
     
+    /**
+     * Get an error name matching the given code
+     * @param errorcode Error code
+     * @return error name
+     */
     private String getErrorName(int errorcode) {
         switch (errorcode) {
             case ERROR_WRONG_PARAM:        return "wrong_param";
@@ -65,6 +108,7 @@ public class MusapResp extends GsonMessage {
             case ERROR_SSCD_UNREACHABLE:   return "sscd_unreachable";
             case ERROR_COUPLING_ERROR:     return "coupling_error";
             case ERROR_INTERNAL: default:  return "internal_error";
+            case ERROR_CONFIGURATION:      return "configuration_error";
         }
     }
     

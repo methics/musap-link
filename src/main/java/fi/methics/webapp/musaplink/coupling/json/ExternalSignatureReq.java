@@ -30,6 +30,9 @@ public class ExternalSignatureReq extends CouplingApiPayload {
     @SerializedName("format")
     public String format;
 
+    @SerializedName("keyid")
+    public String keyid;
+
     @SerializedName("publickey")
     public String publickey;
 

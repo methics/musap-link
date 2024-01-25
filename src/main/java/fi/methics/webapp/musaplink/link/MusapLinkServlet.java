@@ -4,6 +4,7 @@ import java.time.Duration;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -13,14 +14,19 @@ import org.apache.commons.logging.LogFactory;
 
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.TxnStorage;
+import fi.methics.webapp.musaplink.link.cmd.CmdDocSign;
 import fi.methics.webapp.musaplink.link.cmd.CmdGenerateKey;
 import fi.methics.webapp.musaplink.link.cmd.CmdLink;
+import fi.methics.webapp.musaplink.link.cmd.CmdListKeys;
 import fi.methics.webapp.musaplink.link.cmd.CmdSign;
 import fi.methics.webapp.musaplink.link.cmd.CmdUpdateKey;
+import fi.methics.webapp.musaplink.link.json.MusapDocSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapGenerateKeyReq;
 import fi.methics.webapp.musaplink.link.json.MusapGenerateKeyResp;
 import fi.methics.webapp.musaplink.link.json.MusapLinkReq;
 import fi.methics.webapp.musaplink.link.json.MusapLinkResp;
+import fi.methics.webapp.musaplink.link.json.MusapListKeysReq;
+import fi.methics.webapp.musaplink.link.json.MusapListKeysResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
 import fi.methics.webapp.musaplink.link.json.MusapUpdateKeyReq;
@@ -76,6 +82,18 @@ public class MusapLinkServlet {
         
         return Response.ok(jResp.toJson()).build();
     }
+
+    
+    @POST
+    @Path("/docsign")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response docsign(String body) {
+        
+        MusapDocSignReq jReq  = MusapDocSignReq.fromJson(body, MusapDocSignReq.class);
+        MusapSignResp   jResp = new CmdDocSign(jReq).execute();
+        
+        return Response.ok(jResp.toJson()).build();
+    }
     
     @POST
     @Path("/generatekey")
@@ -95,6 +113,18 @@ public class MusapLinkServlet {
         
         MusapUpdateKeyReq  jReq  = MusapUpdateKeyReq.fromJson(body, MusapUpdateKeyReq.class);
         MusapUpdateKeyResp jResp = new CmdUpdateKey(jReq).execute();
+        
+        return Response.ok(jResp.toJson()).build();
+    }
+
+    
+    @POST
+    @Path("/listkeys")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response listkeys(String body) {
+        
+        MusapListKeysReq  jReq  = MusapListKeysReq.fromJson(body, MusapListKeysReq.class);
+        MusapListKeysResp jResp = new CmdListKeys(jReq).execute();
         
         return Response.ok(jResp.toJson()).build();
     }

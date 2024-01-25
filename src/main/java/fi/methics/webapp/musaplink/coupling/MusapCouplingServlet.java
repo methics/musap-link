@@ -115,8 +115,13 @@ public class MusapCouplingServlet {
             return MusapResp.createErrorResponse(MusapResp.ERROR_INTERNAL);
         }
         
-        log.debug("Response Payload: " + jReq.getPayloadJson());
-        return Response.ok(GSON.toJson(jResp)).build();
+        if (jResp == null) {
+            log.debug("Returning empty response");
+            return Response.ok().build();
+        } else {
+            log.debug("Response Payload: " + jReq.getPayloadJson());
+            return Response.ok(GSON.toJson(jResp)).build();
+        }
     }
     
 }
