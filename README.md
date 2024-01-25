@@ -12,6 +12,10 @@ MUSAP library can be found here:
 - **Push Notification Support**: MUSAP Link provides simple push notification integration, supporting both APNs and FCM.
 - **Database Compatibility**: Supports external databases, with recommended options being PostgreSQL or SQLite3.
 
+## Architecture
+
+![Link_Library_Architecture](https://github.com/methics/musap-link/assets/4453264/2997cae8-d44e-4709-8192-ae31624eff62)
+
 ## Installation
 
 ### Building
