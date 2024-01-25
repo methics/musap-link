@@ -2,6 +2,10 @@
 
 MUSAP Link is an optional Java server component for the MUSAP library. MUSAP Link allows integrating the MUSAP library to external web services with a simple REST API.
 
+MUSAP link library does not store any critical user data. It only stores push notification tokens and transport security keys for each registered MUSAP client library. Registering a MUSAP library to the link library is always optional and a user choice.
+
+Each MUSAP link can be integrated with any number of apps using the MUSAP library. The MUSAP link server URL must be configured on the MUSAP library to enable the connectivity between the link library and the MUSAP library.
+
 MUSAP library can be found here:
 * [MUSAP Android](https://github.com/methics/musap-android)
 * [MUSAP iOS](https://github.com/methics/musap-ios)
