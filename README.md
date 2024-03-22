@@ -38,9 +38,18 @@ The SQL schema can be found [here](https://github.com/methics/musap-link/blob/ma
 
 ## Usage
 
-We recommend running MUSAP with:
+Installer needs to create musaplink.conf and fill PostgreSQL details. The configuration is copied into
+/usr/local/tomcat/conf.
 
-`mvn jetty:run`
+`cp musaplink.conf.sample musaplink.conf`
+
+### Building docker image
+
+`docker build -t musap-link .`
+
+### Running the container
+
+`docker run -p 8080:8080 musap-link:latest`
 
 ## Configuration
 
