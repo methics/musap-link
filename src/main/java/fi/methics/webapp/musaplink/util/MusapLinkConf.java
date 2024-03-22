@@ -31,6 +31,9 @@ public class MusapLinkConf {
     private Properties properties;
     private String     home;
     
+    private FcmConfig  fcmConfig;
+    private ApnsConfig apnsConfig;
+    
     private MusapLinkConf(String filename) {
         this.home = System.getProperty("CATALINA_HOME");
         if (this.home == null) this.home = "";
@@ -38,6 +41,8 @@ public class MusapLinkConf {
         this.filename    = filename;
         this.initialized = true;
         this.properties  = readProperties(this.filename);
+        this.fcmConfig   = new FcmConfig(this.properties, PREFIX);
+        this.apnsConfig  = new ApnsConfig(this.properties, PREFIX);
     }
     
     public static MusapLinkConf getInstance() {
@@ -84,7 +89,7 @@ public class MusapLinkConf {
      * @return FCM config
      */
     public FcmConfig getFcmConfig() {
-        return new FcmConfig(this.properties, PREFIX);
+        return this.fcmConfig;
     }
 
     /**
@@ -92,7 +97,7 @@ public class MusapLinkConf {
      * @return FCM config
      */
     public ApnsConfig getApnsConfig() {
-        return new ApnsConfig(this.properties, PREFIX);
+        return this.apnsConfig;
     }
     
     /**
@@ -141,12 +146,14 @@ public class MusapLinkConf {
                 String keystoreFile = this.properties.getProperty(PREFIX + "client.keystore." + i);
                 String keystorePwd  = this.properties.getProperty(PREFIX + "client.keystore.pwd." + i);
                 String keystoreType = this.properties.getProperty(PREFIX + "client.keystore.type." + i);
-
-                String sigProfile     = this.properties.getProperty(PREFIX + "signature.profile." + i, Etsi204Client.SIGPROF_ALAUDA_SIGN);
+                String sigProfile   = this.properties.getProperty(PREFIX + "client.signature.profile." + i, Etsi204Client.SIGPROF_ALAUDA_SIGN);
+                
                 boolean enableNospam  = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.nospam.enabled" + i));
                 boolean enableEventid = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.eventid.enabled." + i));
 
                 ClientType clientType = ClientType.fromString(this.properties.getProperty(PREFIX + "client.type." + i));
+                
+                log.debug("Configuring client " + clientid + " with AP ID " + apid);
                 
                 clients.add(new Etsi204ClientBuilder(clientid, sscdtype)
                         .withApid(apid)

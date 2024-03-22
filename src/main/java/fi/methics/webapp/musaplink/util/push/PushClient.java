@@ -1,5 +1,8 @@
 package fi.methics.webapp.musaplink.util.push;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
 import fi.methics.webapp.musaplink.util.push.datatype.ApnsReq;
@@ -9,6 +12,8 @@ import fi.methics.webapp.musaplink.util.push.datatype.FcmReq;
  * Simple class for FCM and APNs push notification sending
  */
 public class PushClient {
+    
+    private static final Log log = LogFactory.getLog(PushClient.class);
 
     /**
      * Send a push notification to the user 
@@ -18,6 +23,7 @@ public class PushClient {
     public static void sendPushNotification(MusapLinkAccount account, String message) {
         
         if (account == null) {
+            log.debug("No account. Skipping push notification.");
             return;
         }
         
@@ -36,6 +42,7 @@ public class PushClient {
             apnsClient.sendMessage(apnsReq);
             return;
         }
+        log.debug("Skipping push notification");
     }
 
 }

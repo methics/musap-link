@@ -281,7 +281,7 @@ public class ExpirableMap<K,V> implements Map<K,V> {
         Long lifeEnds = this.keyTimestamps.remove(key);
         if (lifeEnds != null) {
             K [] t = this.timestamps.get(lifeEnds);
-            if (t.length > 1) {
+            if (t != null && t.length > 1) {
                 List<K> l = new LinkedList<K>();
                 for (int i = 0; i < t.length; i++) {
                     if (!t[i].equals(key)) {

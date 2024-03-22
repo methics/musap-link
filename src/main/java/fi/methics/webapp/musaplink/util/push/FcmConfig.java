@@ -5,6 +5,8 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 
@@ -13,20 +15,22 @@ import org.apache.http.impl.client.HttpClients;
  * 
  * Example:
  * <pre>
- * webapp.musaplink.fcm.projectid = 1000707872362
- * webapp.musaplink.fcm.debug     = true
- * webapp.musaplink.fcm.apikey    = ...
+ * webapp.musaplink.fcm.projectid   = 1000707872362
+ * webapp.musaplink.fcm.projectname = test-app
+ * webapp.musaplink.fcm.debug       = true
+ * webapp.musaplink.google.services.file = ...
  * </pre>
  */
 public class FcmConfig  {
 
+    private static final Log log = LogFactory.getLog(FcmConfig.class);
+    
     public final static String TYPE = "FCM";
     
     private final boolean fcmDebugEnable;
     private final boolean fcmProdEnable;
     private final String  fcmProjectID;
     private final String  fcmProjectName;
-    private final String  fcmAPIkey;
     
     private final String  googleServicesJsonFile;
     
@@ -38,13 +42,16 @@ public class FcmConfig  {
     {
         this.properties     = p;
         this.fcmProdEnable  = Boolean.parseBoolean(p.getProperty(prefix  + "fcm.production"));
-        this.fcmDebugEnable = Boolean.parseBoolean(p.getProperty(prefix + "fcm.debug"));
+        this.fcmDebugEnable = Boolean.parseBoolean(p.getProperty(prefix  + "fcm.debug"));
         this.fcmProjectID   = p.getProperty(prefix + "fcm.projectid");
         this.fcmProjectName = p.getProperty(prefix + "fcm.projectname", this.fcmProjectID);
-        this.fcmAPIkey      = p.getProperty(prefix + "fcm.apikey");
-        
         this.googleServicesJsonFile = p.getProperty(prefix + "google.services.file", "conf/google-services.json");
         
+        if (this.isEnabled()) {
+            log.info("FCM Push Notifications are enabled");
+        } else {
+            log.debug("FCM Push Notifications are disabled");
+        }
     }
     
     public FcmClient getClient() {
@@ -72,10 +79,6 @@ public class FcmConfig  {
     
     public boolean isFcmProdEnabled() {
         return this.fcmProdEnable;
-    }
-
-    public String getFcmApiKey() {
-        return this.fcmAPIkey;
     }
 
     public Properties getProperties() {

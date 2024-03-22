@@ -7,13 +7,12 @@ import java.util.concurrent.TimeoutException;
 
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
-import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
+import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.link.LinkCommand;
 import fi.methics.webapp.musaplink.link.json.MusapDocSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapDocSignReq.DTBS;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
-import fi.methics.webapp.musaplink.link.json.MusapSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.SignatureCallback;
