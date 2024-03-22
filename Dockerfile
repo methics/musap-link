@@ -19,6 +19,8 @@ COPY --from=builder /usr/src/musap-link/target/MUSAPLink-*.war /usr/local/tomcat
 
 COPY ./conf/musaplink.policy /usr/local/tomcat/conf/
 
+COPY ./conf/musaplink.conf /usr/local/tomcat/conf/
+
 # Append custom policy to the default catalina.policy
 RUN cat /usr/local/tomcat/conf/musaplink.policy >> /usr/local/tomcat/conf/catalina.policy
 
