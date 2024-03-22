@@ -1,6 +1,7 @@
 package fi.methics.webapp.musaplink.coupling.json;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.google.gson.annotations.SerializedName;
@@ -17,6 +18,9 @@ public class ExternalSignatureResp extends CouplingApiPayload {
 
     @SerializedName("keyid")
     public String keyid;
+
+    @SerializedName("keyusages")
+    public List<String> keyusages;
     
     @SerializedName("signature")
     public String signature;

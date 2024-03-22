@@ -69,6 +69,9 @@ public class SignatureReq extends CouplingApiPayload {
         
         @SerializedName("key")
         public Key key;
+
+        @SerializedName("mimetype")
+        public String mimetype;
         
     }
     

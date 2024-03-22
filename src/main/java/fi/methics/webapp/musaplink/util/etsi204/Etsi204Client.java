@@ -1,5 +1,7 @@
 package fi.methics.webapp.musaplink.util.etsi204;
 
+import java.util.Map;
+
 /**
  * ETSI TS 102 204 signature client
  */
@@ -8,7 +10,14 @@ public abstract class Etsi204Client {
     public static final String SIGPROF_ALAUDA_AUTHN = "http://alauda.mobi/digitalSignature";
     public static final String SIGPROF_ALAUDA_SIGN  = "http://alauda.mobi/nonRepudiation";
     
-    protected String sscdid;
+    public static final String DEFAULT_MIMETYPE = "application/octet-stream";
+    
+    public static final String ATTR_MIMETYPE    = "mimetype";
+    public static final String ATTR_EVENTID     = "eventid";
+    public static final String ATTR_LANGUAGE    = "language";
+    
+    
+    protected String clientid;
     protected String sscdtype;
     
     protected boolean enableNoSpamCode;
@@ -16,8 +25,8 @@ public abstract class Etsi204Client {
     
     protected String signatureProfile;
     
-    protected Etsi204Client(String sscdid, String sscdtype) {
-        this.sscdid   = sscdid;
+    protected Etsi204Client(String clientid, String sscdtype) {
+        this.clientid = clientid;
         this.sscdtype = sscdtype;
     }
     
@@ -57,11 +66,12 @@ public abstract class Etsi204Client {
     public abstract Etsi204Response sign(String msisdn, 
                                          String dtbd,
                                          byte[] dtbs,
-                                         String transid) 
+                                         String transid,
+                                         Map<String, String> attrs) 
         throws Etsi204Exception;
     
     public String getClientId() {
-        return this.sscdid;
+        return this.clientid;
     }
     
     public String getSscdType() {

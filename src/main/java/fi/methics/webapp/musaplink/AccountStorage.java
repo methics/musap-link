@@ -16,7 +16,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
-import fi.methics.webapp.musaplink.link.MusapLinkServlet;
 import fi.methics.webapp.musaplink.util.CouplingCode;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
@@ -28,7 +27,7 @@ import fi.methics.webapp.musaplink.util.db.MusapDb;
  */
 public class AccountStorage extends MusapDb {
     
-    private static final Log log = LogFactory.getLog(MusapLinkServlet.class);
+    private static final Log log = LogFactory.getLog(AccountStorage.class);
 
     private static final String INSERT_COUPLING_CODE = "INSERT INTO coupling_codes (couplingcode, linkid, created_dt) VALUES (?,?, ?)";
     private static final String SELECT_COUPLING_CODE = "SELECT linkid, couplingcode FROM coupling_codes WHERE couplingcode=?";
@@ -51,6 +50,8 @@ public class AccountStorage extends MusapDb {
 
     private static final String SELECT_MUSAPID_BY_LINKID   = "SELECT musapid FROM link_ids WHERE linkid=?";
     private static final String SELECT_LINKIDS_BY_MUSAPID  = "SELECT linkid  FROM link_ids WHERE musapid=?";
+
+    public static final String SIMULATED_LINKID = "SIMULATED-LINKID";
 
     /**
      * Add a linkid to an existing MUSAP account
@@ -272,7 +273,7 @@ public class AccountStorage extends MusapDb {
                 PreparedStatement ps = conn.prepareStatement(LIST_ACCOUNTS))
         {
             try (ResultSet result = ps.executeQuery()) {
-                if (result.next()) {
+                while (result.next()) {
                     MusapLinkAccount account = new MusapLinkAccount();
                     account.musapid = result.getString(1);
                     account.fcmToken = result.getString(2);
@@ -301,7 +302,7 @@ public class AccountStorage extends MusapDb {
         {
             ps.setString(1,  account.musapid);
             try (ResultSet result = ps.executeQuery()) {
-                if (result.next()) {
+                while (result.next()) {
                     MusapKey key = new MusapKey();
                     key.keyid       = result.getString(1);
                     key.keyname     = result.getString(2);
@@ -443,7 +444,7 @@ public class AccountStorage extends MusapDb {
         
             if (oldKey.equals(key)) {
                 // Keys equal already
-                log.debug("Keys are equal. Not updating.");
+                log.debug("Keys are equal. Not updating key with keyid " + keyid);
                 return;
             }
             

@@ -42,7 +42,8 @@ public class CmdListKeys extends LinkCommand<MusapListKeysReq, MusapListKeysResp
         
         log.debug("Listing keys for " + account);
         Collection<MusapKey> keys = AccountStorage.listKeyDetails(account);
-        
+        log.debug("Found " + keys.size() + " keys");
+
         jResp.addKeys(keys);
         return jResp;
     }

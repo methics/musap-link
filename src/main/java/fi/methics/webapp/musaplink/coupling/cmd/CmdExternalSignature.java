@@ -44,18 +44,16 @@ public class CmdExternalSignature extends CouplingCommand {
         if (account == null) throw new MusapException(MusapResp.ERROR_UNKNOWN_USER);
 
         ExternalSignatureReq sigReq = this.getRequestPayload();
-        String transid = sigReq.transid;
-        
         
         // Check if this was a poll request
-        if (transid != null) {
-            return this.poll(req, transid);
+        if (sigReq.transid != null) {
+            return this.poll(req, sigReq.transid);
         } 
         
         // Generate new transid for future use
-        sigReq.transid = IdGenerator.generateTxnId();
+        String transid = IdGenerator.generateTxnId();
         log.info("Got external signature request from MUSAP ID " + musapid);
-        log.debug("Created a new transaction with transid " + sigReq.transid);
+        log.debug("Created a new transaction with transid " + transid);
         Etsi204Client client = this.getConfig().getClient(sigReq.clientid);
         
         if (client == null) {
@@ -64,10 +62,9 @@ public class CmdExternalSignature extends CouplingCommand {
             throw new MusapException(MusapResp.ERROR_INTERNAL);
         }
         
-        this.sendRequest(account, client, req, sigReq);
-        
+        this.sendRequest(account, client, req, sigReq, transid);
         ExternalSignatureResp statusResp = new ExternalSignatureResp();
-        statusResp.transid = sigReq.transid;
+        statusResp.transid = transid;
         statusResp.status  = "pending";
         return req.createResponse(statusResp);
     }
@@ -84,9 +81,13 @@ public class CmdExternalSignature extends CouplingCommand {
         CouplingApiPayload payload = RESPONSES.get(transid);
         
         if (payload == null) {
-            log.error("No transaction found with transid " + transid);
-            return null;
+            log.info("No transaction found with transid " + transid);
+            ExternalSignatureResp statusResp = new ExternalSignatureResp();
+            statusResp.transid = transid;
+            statusResp.status  = "pending";
+            return req.createResponse(statusResp);
         }
+        
         log.info("Found transaction with payload " + payload);
         return req.createResponse(payload);
     }
@@ -94,13 +95,19 @@ public class CmdExternalSignature extends CouplingCommand {
     /**
      * Send a signature request to the external service asynchronously
      * @param client Client to send request with
-     * @param req    Raw MUSAP Coupling API request
-     * @param sigReq Raw External Signature request
+     * @param req     Raw MUSAP Coupling API request
+     * @param sigReq  Raw External Signature request
+     * @param transid Transaction ID
      * @throws Etsi204Exception
      */
-    private void sendRequest(MusapLinkAccount account, Etsi204Client client, CouplingApiMessage req, ExternalSignatureReq sigReq) throws Etsi204Exception {
+    private void sendRequest(MusapLinkAccount account,
+                             Etsi204Client client, 
+                             CouplingApiMessage req, 
+                             ExternalSignatureReq sigReq, 
+                             String transid) 
+        throws Etsi204Exception 
+    {
         
-        String transid = sigReq.transid;
         if (transid == null) {
             log.error("Not storing empty transid");
             return;
@@ -112,7 +119,7 @@ public class CmdExternalSignature extends CouplingCommand {
             
             log.debug("Sending signature request to clientid=" + sigReq.clientid + ", msisdn=" + msisdn);
             try {
-                Etsi204Response resp = client.sign(msisdn, dtbd, sigReq.getDtbs(), transid);
+                Etsi204Response resp = client.sign(msisdn, dtbd, sigReq.getDtbs(), transid, sigReq.attributes);
                 
                 ExternalSignatureResp sigResp = new ExternalSignatureResp();
                 sigResp.signature   = resp.getSignatureB64();

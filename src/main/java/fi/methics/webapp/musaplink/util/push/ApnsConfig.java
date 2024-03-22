@@ -82,6 +82,12 @@ public class ApnsConfig {
                 log.warn("Could not load APNS signing key", e);
             }
         }
+        
+        if (this.isEnabled()) {
+            log.info("APNs Push Notifications are enabled");
+        } else {
+            log.debug("APNs Push Notifications are disabled");
+        }
     }
     
     public ApnsClient getClient() {

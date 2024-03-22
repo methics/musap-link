@@ -2,8 +2,11 @@ package fi.methics.webapp.musaplink;
 
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+
+import com.google.gson.annotations.SerializedName;
 
 import fi.methics.webapp.musaplink.coupling.json.ExternalSignatureResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
@@ -35,16 +38,27 @@ public class MusapLinkAccount {
      * <ul>
      * <li>Key ID
      * <li>Key Name
+     * <li>Key Usage
      * <li>Public Key
      * <li>Certificate
      * </ul>
      */
     public static class MusapKey {
         
+        @SerializedName("publickey")
         public byte[] publickey;
+        
+        @SerializedName("certificate")
         public byte[] certificate;
+
+        @SerializedName("keyid")
         public String keyid;
+        
+        @SerializedName("keyname")
         public String keyname;
+        
+        @SerializedName("keyusages")
+        public List<String> keyusages;
         
         public MusapKey() {
             
@@ -76,6 +90,7 @@ public class MusapLinkAccount {
          */
         public MusapKey(ExternalSignatureResp resp) {
             this.keyid       = resp.keyid;
+            this.keyusages   = resp.keyusages;
             this.publickey   = resp.getPublicKey();
             this.certificate = resp.getCertificate();
         }
