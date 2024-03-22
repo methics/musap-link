@@ -41,8 +41,10 @@ public class MusapLinkConf {
         this.filename    = filename;
         this.initialized = true;
         this.properties  = readProperties(this.filename);
-        this.fcmConfig   = new FcmConfig(this.properties, PREFIX);
-        this.apnsConfig  = new ApnsConfig(this.properties, PREFIX);
+        if (this.properties != null) {
+            this.fcmConfig   = new FcmConfig(this.properties, PREFIX);
+            this.apnsConfig  = new ApnsConfig(this.properties, PREFIX);
+        }
     }
     
     public static MusapLinkConf getInstance() {
