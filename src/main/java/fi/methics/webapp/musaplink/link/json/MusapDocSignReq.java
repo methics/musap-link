@@ -44,12 +44,13 @@ public class MusapDocSignReq extends MusapReq {
                 }
                 fi.methics.webapp.musaplink.coupling.json.SignatureReq.DTBS couplingDtbs = new fi.methics.webapp.musaplink.coupling.json.SignatureReq.DTBS();
                 couplingDtbs.data = dtbs.data;
+                couplingDtbs.mimetype = dtbs.mimetype;
                 couplingDtbs.key  = new SignatureReq.Key();
-                couplingDtbs.key.keyid     = dtbs.key.keyid;
-                couplingDtbs.key.keyname   = dtbs.key.keyname;
-                couplingDtbs.key.keyusage  = dtbs.key.keyusage;
+                couplingDtbs.key.keyid         = dtbs.key.keyid;
+                couplingDtbs.key.keyname       = dtbs.key.keyname;
+                couplingDtbs.key.keyusage      = dtbs.key.keyusage;
                 couplingDtbs.key.publickeyhash = dtbs.key.publickeyhash;
-                couplingDtbs.key.algorithm = dtbs.key.algorithm;
+                couplingDtbs.key.algorithm     = dtbs.key.algorithm;
                 req.datachoice.add(couplingDtbs);
             }
         }
@@ -65,6 +66,9 @@ public class MusapDocSignReq extends MusapReq {
         
         @SerializedName("key")
         public Key key;
+
+        @SerializedName("mimetype")
+        public String mimetype;
         
     }
     

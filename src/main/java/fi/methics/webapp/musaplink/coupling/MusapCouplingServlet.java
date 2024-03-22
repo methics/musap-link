@@ -55,7 +55,6 @@ public class MusapCouplingServlet {
         CouplingApiMessage jReq  = GSON.fromJson(body, CouplingApiMessage.class);
         CouplingApiMessage jResp = null;
         
-        log.debug("Got request from MUSAP: " + body);
         if (jReq == null) {
             log.debug("No request body");
             return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM);

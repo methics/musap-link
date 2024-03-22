@@ -2,6 +2,7 @@ package fi.methics.webapp.musaplink.util.etsi204;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import fi.laverca.etsi.EtsiClient;
@@ -35,7 +36,8 @@ public class Etsi204SoapClient extends Etsi204Client {
     public Etsi204Response sign(final String msisdn, 
                                 final String dtbd,
                                 final byte[] dtbs,
-                                final String transid) 
+                                final String transid,
+                                final Map<String, String> attrs) 
         throws Etsi204Exception
     {
         
@@ -49,8 +51,10 @@ public class Etsi204SoapClient extends Etsi204Client {
                 additionalServices.add(FiComAdditionalServices.createNoSpamService(null, false));
             }
             
-            String    mimeType  = "application/octet-stream";
-            String    apTransId = "A" + UUID.randomUUID().toString();
+            String mimeType = attrs.get(ATTR_MIMETYPE);
+            if (mimeType == null) mimeType = DEFAULT_MIMETYPE;
+            
+            String apTransId = "A" + UUID.randomUUID().toString();
             EtsiRequest soapReq = this.client.createRequest(apTransId, 
                                                             msisdn,
                                                             new DTBS(dtbs, "BASE64", mimeType),

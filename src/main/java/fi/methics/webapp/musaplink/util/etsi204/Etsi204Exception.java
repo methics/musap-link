@@ -4,6 +4,7 @@ import javax.xml.namespace.QName;
 
 import org.apache.axis.AxisFault;
 
+import fi.methics.laverca.rest.util.MssRestException;
 import fi.methics.webapp.musaplink.coupling.json.MusapErrorMsg;
 
 public class Etsi204Exception extends Exception {
@@ -29,6 +30,8 @@ public class Etsi204Exception extends Exception {
         } else if (e instanceof IllegalArgumentException) {
             this.errorCode = "101";
             this.errorMsg  = "WRONG_PARAM";
+        } else if (e instanceof MssRestException) {
+            this.errorCode = ((MssRestException)e).getErrorCode();
         } else {
             this.errorCode = "900";
             this.errorMsg  = "INTERNAL_ERROR";

@@ -6,6 +6,9 @@ import java.security.GeneralSecurityException;
 import javax.net.ssl.SSLSocketFactory;
 import javax.servlet.ServletException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import fi.laverca.etsi.EtsiClient;
 import fi.methics.laverca.rest.MssClient;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client.ClientType;
@@ -15,6 +18,8 @@ import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client.ClientType;
  * This can be used to build both REST and SOAP clients.
  */
 public class Etsi204ClientBuilder {
+
+    private static final Log log = LogFactory.getLog(Etsi204ClientBuilder.class);
 
     private String apid;
     private String appwd;
@@ -56,6 +61,7 @@ public class Etsi204ClientBuilder {
 
         Etsi204Client result;
         if (this.clientType == ClientType.SOAP) {
+            log.debug("Initializing SOAP client " + this.clientid);
             SSLSocketFactory ssf = fi.laverca.mss.MssClient.createSSLFactory(this.keystoreFile,
                                                                              this.keystorePwd,
                                                                              this.keystoreType);
@@ -72,6 +78,7 @@ public class Etsi204ClientBuilder {
             client.setSSLSocketFactory(ssf);
             result = new Etsi204SoapClient(client, this.clientid, this.sscdtype);
         } else {
+            log.debug("Initializing REST client " + this.clientid);
             MssClient.Builder builder = new MssClient.Builder();
             builder.withAppwd(this.appwd);
             builder.withRestUrl(this.resturl);
@@ -81,7 +88,7 @@ public class Etsi204ClientBuilder {
                 builder.withPassword(this.apid, this.restPasword);
             }
             builder.withAppwd(this.appwd);
-            result = new Etsi204RestClient(builder.build(), sscdtype, sscdtype);
+            result = new Etsi204RestClient(builder.build(), this.clientid, this.sscdtype);
         }
         result.setEventIdEnabled(this.enableEventId);
         result.setNospamCodeEnabled(this.enableNospamCode);
