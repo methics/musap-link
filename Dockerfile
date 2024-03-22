@@ -8,13 +8,15 @@ WORKDIR /usr/src/musap-link
 RUN mvn clean package
 
 # Running stage
-FROM tomcat:9.0
+FROM tomcat:9
 
 # Set the working directory in the container
 WORKDIR /usr/local/tomcat
 
 # Copy the WAR file into the Tomcat webapps directory
-COPY --from=builder /usr/src/musap-link/target/MUSAPLink-*.war /usr/local/tomcat/webapps/musap-link.war
+COPY --from=builder /usr/src/musap-link/target/MUSAPLink-*.war /usr/local/tomcat/webapps/musaplink.war
+
+COPY ./logging.properties /usr/local/tomcat/conf/
 
 # Make port 8080 available to the world outside this container
 EXPOSE 8080
