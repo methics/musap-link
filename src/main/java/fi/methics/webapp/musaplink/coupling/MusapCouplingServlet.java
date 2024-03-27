@@ -9,6 +9,8 @@ import org.apache.commons.logging.LogFactory;
 
 import com.google.gson.Gson;
 
+import fi.methics.webapp.musaplink.AccountStorage;
+import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdEnrollData;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdExternalSignature;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdGenerateKeyCallback;
@@ -20,6 +22,7 @@ import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
+import fi.methics.webapp.musaplink.util.MusapTransportEncryption;
 
 /**
  * Servlet for communication between MUSAP and MUSAP Link.
@@ -28,8 +31,7 @@ import fi.methics.webapp.musaplink.util.MusapLinkConf;
 @Path("/")
 public class MusapCouplingServlet {
 
-    private static final Log log = LogFactory.getLog(MusapCouplingServlet.class);
-    
+    private static final Log  log  = LogFactory.getLog(MusapCouplingServlet.class);
     private static final Gson GSON = new Gson();
     
     private static MusapLinkConf conf;
@@ -54,11 +56,26 @@ public class MusapCouplingServlet {
         
         CouplingApiMessage jReq  = GSON.fromJson(body, CouplingApiMessage.class);
         CouplingApiMessage jResp = null;
-        
+
         if (jReq == null) {
             log.debug("No request body");
-            return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM);
+            return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM, "Missing request body");
         }
+        
+        MusapLinkAccount account = null;
+        if (jReq.isEncrypted()) {
+            // Fetch transport encryption keys and decrypt if needed
+            account = AccountStorage.findByLinkId(body);
+            if (account != null && account.aesKey != null) {
+                try {
+                    jReq.decrypt(account.aesKey);
+                } catch (Exception e) {
+                    log.error("Failed to decrypt message", e);
+                    return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM, "Failed to decrypt the request: " + e.getMessage());
+                }
+            }
+        }
+
         log.debug("Request Payload: " + jReq.getPayloadJson());
 
         try {
@@ -104,14 +121,14 @@ public class MusapCouplingServlet {
                 }
                 default: {
                     log.debug("Unknown request type " + jReq.type);
-                    return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM);
+                    return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM, "Unknown request type " + jReq.type);
                 }
             }
         } catch (MusapException e) {
             throw e;
         } catch (Exception e) {
             log.error(jReq.type + " failed", e);
-            return MusapResp.createErrorResponse(MusapResp.ERROR_INTERNAL);
+            return MusapResp.createErrorResponse(MusapResp.ERROR_INTERNAL, e.getMessage());
         }
         
         if (jResp == null) {
@@ -119,6 +136,21 @@ public class MusapCouplingServlet {
             return Response.ok().build();
         } else {
             log.debug("Response Payload: " + jReq.getPayloadJson());
+            
+            if (MusapTransportEncryption.shouldEncrypt(jResp)) {
+                if (account == null) {
+                    account = AccountStorage.findByLinkId(body);
+                }
+                if (account != null) {
+                    try {
+                        jResp.encrypt(account.aesKey);
+                    } catch (Exception e) {
+                        log.error("Failed to encrypt the response", e);
+                        return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM,  "Failed to encrypt the response: " + e.getMessage());
+                    }
+                }
+            }
+            
             return Response.ok(GSON.toJson(jResp)).build();
         }
     }

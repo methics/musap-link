@@ -84,9 +84,17 @@ public class MusapResp extends GsonMessage {
      * @return Response
      */
     public static Response createErrorResponse(int errorcode) {
-        return Response.status(Status.INTERNAL_SERVER_ERROR).entity(MusapResp.createError(errorcode)).build();
+        return createError(errorcode).toResponse();
     }
-    
+
+    /**
+     * Create a JAX-RS Response
+     * @param errorcode Error code
+     * @return Response
+     */
+    public static Response createErrorResponse(int errorcode, String msg) {
+        return createError(errorcode, msg).toResponse();
+    }
     /**
      * Get an error name matching the given code
      * @param errorcode Error code
