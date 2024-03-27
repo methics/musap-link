@@ -1,13 +1,13 @@
 package fi.methics.webapp.musaplink.coupling.cmd;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.UUID;
 
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
 
-import fi.methics.util.Base64;
 import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
@@ -41,7 +41,7 @@ public class CmdEnrollData extends CouplingCommand {
     
         String sharedSecret = payload.getSharedSecret();
         if (sharedSecret != null && sharedSecret.length() > 0) {
-            byte[] ss = Base64.decodeBase64(sharedSecret);
+            byte[] ss = Base64.getDecoder().decode(sharedSecret);
             byte[][] keypair_mac_aes = this.deriveKeys(ss);
             account.macKey = keypair_mac_aes[0];
             account.aesKey = keypair_mac_aes[1];

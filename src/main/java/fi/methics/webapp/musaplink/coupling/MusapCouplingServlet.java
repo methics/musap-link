@@ -20,6 +20,7 @@ import fi.methics.webapp.musaplink.coupling.cmd.CmdSignatureCallback;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdUpdateData;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
 import fi.methics.webapp.musaplink.util.MusapTransportEncryption;
@@ -32,7 +33,7 @@ import fi.methics.webapp.musaplink.util.MusapTransportEncryption;
 public class MusapCouplingServlet {
 
     private static final Log  log  = LogFactory.getLog(MusapCouplingServlet.class);
-    private static final Gson GSON = new Gson();
+    private static final Gson GSON = GsonMessage.GSON;
     
     private static MusapLinkConf conf;
     

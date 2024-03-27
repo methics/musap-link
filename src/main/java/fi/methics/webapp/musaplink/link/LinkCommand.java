@@ -10,6 +10,7 @@ import com.google.gson.Gson;
 
 import fi.methics.webapp.musaplink.link.json.MusapReq;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
+import fi.methics.webapp.musaplink.util.GsonMessage;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
 
 /**
@@ -19,7 +20,7 @@ import fi.methics.webapp.musaplink.util.MusapLinkConf;
 public abstract class LinkCommand <REQ extends MusapReq, RESP extends MusapResp> {
 
     protected static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(10);
-    protected static final Gson                GSON = new Gson();
+    protected static final Gson                GSON = GsonMessage.GSON;
     
     protected static final Log log = LogFactory.getLog(LinkCommand.class);
 
