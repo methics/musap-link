@@ -8,12 +8,14 @@ import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.generators.HKDFBytesGenerator;
 import org.bouncycastle.crypto.params.HKDFParameters;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.coupling.json.EnrollDataReq;
 import fi.methics.webapp.musaplink.coupling.json.EnrollDataResp;
+import fi.methics.webapp.musaplink.link.json.MusapResp;
+import fi.methics.webapp.musaplink.util.MusapException;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
 
 /**
  * Coupling API command for enrolling MUSAP to this MUSAP Link.
@@ -45,6 +47,11 @@ public class CmdEnrollData extends CouplingCommand {
             byte[][] keypair_mac_aes = this.deriveKeys(ss);
             account.macKey = keypair_mac_aes[0];
             account.aesKey = keypair_mac_aes[1];
+        } else {
+            if (this.getConfig().isTransportEncryptionRequired()) {
+                log.error("Transport encryption is required, but client did not provide a secret");
+                throw new MusapException(MusapResp.ERROR_WRONG_PARAM, "Missing transport security secret");
+            }
         }
         
         log.debug("Storing account with MusapID " + account.musapid);

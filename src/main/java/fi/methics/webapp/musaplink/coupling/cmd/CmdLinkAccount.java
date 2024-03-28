@@ -2,7 +2,6 @@ package fi.methics.webapp.musaplink.coupling.cmd;
 
 import java.io.IOException;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.coupling.json.LinkAccountReq;
@@ -10,6 +9,8 @@ import fi.methics.webapp.musaplink.coupling.json.LinkAccountResp;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapRandom;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
+import fi.methics.webapp.musaplink.util.db.CouplingStorage;
 
 /**
  * Coupling API command for requesting MUSAP to link with an RP
@@ -44,7 +45,7 @@ public class CmdLinkAccount extends CouplingCommand {
             return req.createResponse(new LinkAccountResp(linkid, null));
         }
         
-        final String linkid = AccountStorage.findLinkId(couplingcode);
+        final String linkid = CouplingStorage.findLinkId(couplingcode);
         
         if (linkid != null) {
             AccountStorage.addLinkId(payload.musapid, linkid);

@@ -1,4 +1,4 @@
-package fi.methics.webapp.musaplink;
+package fi.methics.webapp.musaplink.util.db;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -9,17 +9,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
-import fi.methics.webapp.musaplink.util.CouplingCode;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
-import fi.methics.webapp.musaplink.util.db.MusapDb;
 
 /**
  * Database class for MUSAP Link Account Storage.
@@ -29,13 +26,10 @@ public class AccountStorage extends MusapDb {
     
     private static final Log log = LogFactory.getLog(AccountStorage.class);
 
-    private static final String INSERT_COUPLING_CODE = "INSERT INTO coupling_codes (couplingcode, linkid, created_dt) VALUES (?,?, ?)";
-    private static final String SELECT_COUPLING_CODE = "SELECT linkid, couplingcode FROM coupling_codes WHERE couplingcode=?";
-    private static final String DELETE_OLD_COUPLING_CODES = "DELETE FROM coupling_codes WHERE created_dt<?";
-
     private static final String INSERT_ACCOUNT       = "INSERT INTO musap_accounts (musapid, fcmtoken, apnstoken, created_dt) VALUES (?,?,?,?)";
     private static final String INSERT_LINKID        = "INSERT INTO link_ids (musapid, linkid, name) VALUES (?,?,?)";
     private static final String INSERT_KEYS          = "INSERT INTO transport_keys (musapid, mackey, enckey) VALUES (?,?,?)";
+    private static final String SELECT_KEYS          = "SELECT mackey, enckey FROM transport_keys WHERE musapid=?";
     
     private static final String UPDATE_ACCOUNT       = "UPDATE musap_accounts SET fcmtoken=?, apnstoken=? WHERE musapid=?";
     private static final String SELECT_ACCOUNT       = "SELECT musapid, fcmtoken, apnstoken FROM musap_accounts WHERE musapid=?";
@@ -43,7 +37,6 @@ public class AccountStorage extends MusapDb {
     
     private static final String INSERT_KEYDETAILS         = "INSERT INTO key_details (musapid, keyid, keyname, certificate, publickey) VALUES (?,?,?,?,?)";
     private static final String UPDATE_KEYDETAILS         = "UPDATE key_details SET keyname=?, certificate=?, publickey=?, modified_dt=? WHERE musapid=? AND keyid=?";
-    private static final String UPDATE_KEYDETAILS_BY_NAME = "UPDATE key_details SET keyname=?, certificate=?, publickey=?, modified_dt=? WHERE musapid=? AND keyname=?";
     private static final String SELECT_KEYDETAILS         = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=? AND keyname=?";
     private static final String SELECT_KEYDETAILS_BY_ID   = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=? AND keyid=?";
     private static final String LIST_KEYDETAILS           = "SELECT keyid, keyname, certificate, publickey FROM key_details WHERE musapid=?";
@@ -59,7 +52,7 @@ public class AccountStorage extends MusapDb {
      * @param linkid
      */
     public static void addLinkId(String musapid, String linkid) {
-        MusapLinkAccount account = findByMusapId(musapid);
+        MusapLinkAccount account = findAccountByMusapId(musapid);
         if (account == null) {
             log.warn("No account found with musapid " + musapid + ". Not linking.");
             return;
@@ -81,27 +74,11 @@ public class AccountStorage extends MusapDb {
     }
     
     /**
-     * Clean old coupling codes
-     */
-    public static void cleanCouplingCodes() {
-        try (Connection conn = getConnection();
-            PreparedStatement ps = conn.prepareStatement(DELETE_OLD_COUPLING_CODES))
-        {
-            int cutoff = MusapLinkConf.getInstance().getCouplingLifetime();
-            int cutoffMs = cutoff * 1000;
-            ps.setTimestamp(1, new Timestamp(System.currentTimeMillis() - cutoffMs));
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed clean coupling codes", e);
-        }
-    }
-    
-    /**
      * Find a MUSAP account by Link ID
      * @param linkid Link ID
      * @return MusapAccount or null
      */
-    public static MusapLinkAccount findByLinkId(String linkid) {
+    public static MusapLinkAccount findAccountByLinkId(String linkid) {
         if (linkid == null) return null;
         
         try (Connection conn = getConnection();
@@ -110,7 +87,7 @@ public class AccountStorage extends MusapDb {
             ps.setString(1, linkid);
             try (ResultSet result = ps.executeQuery()) {
                 if (result.next()) {
-                    return findByMusapId(result.getString(1));
+                    return findAccountByMusapId(result.getString(1));
                 }
             }
         } catch (SQLException e) {
@@ -125,7 +102,7 @@ public class AccountStorage extends MusapDb {
      * @param musapid MUSAP ID
      * @return MusapAccount or null
      */
-    public static MusapLinkAccount findByMusapId(String musapid) {
+    public static MusapLinkAccount findAccountByMusapId(String musapid) {
         if (musapid == null) return null;
         
         try (Connection conn = getConnection();
@@ -139,6 +116,7 @@ public class AccountStorage extends MusapDb {
                     account.fcmToken = result.getString(2);
                     account.apnsToken = result.getString(3);
                     account.linkids = new HashSet<>(listLinkIds(musapid));
+                    fillTransportKeys(conn, account);
                     return account;
                 }
             }
@@ -149,31 +127,6 @@ public class AccountStorage extends MusapDb {
         return null;
     }
     
-    /**
-     * Check if a Link ID is found for the given coupling code. Removes it from the list if found.
-     * @param couplingCode Coupling Code
-     * @return Link ID if found. Null otherwise.
-     */
-    public static String findLinkId(String couplingCode) {
-        
-        String linkid = null;
-        
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(SELECT_COUPLING_CODE))
-        {
-            ps.setString(1, couplingCode);
-            try (ResultSet result = ps.executeQuery()) {
-                if (result.next()) {
-                    linkid = result.getString(1);
-                }
-            }
-        } catch (SQLException e) {
-            log.error("Failed find Link ID", e);
-            throw new MusapException(e);
-        }
-        return linkid;
-    }
-
     /**
      * Get KeyID based on the given keyname
      * @param account MUSAP account
@@ -320,55 +273,12 @@ public class AccountStorage extends MusapDb {
     }
     
     /**
-     * Generate a new Coupling Code for given LinkID. Store the combination.
-     * @param linkid Link ID
-     * @return Coupling Code
-     */
-    public static synchronized CouplingCode newCouplingCode(String linkid) {
-        CouplingCode couplingCode = new CouplingCode();
-        
-        while (findLinkId(couplingCode.getCode()) != null) {
-            couplingCode = new CouplingCode();
-        }
-        
-        try (Connection conn = getConnection();
-             PreparedStatement ps = conn.prepareStatement(INSERT_COUPLING_CODE))
-        {
-            ps.setString(1, couplingCode.getCode());
-            ps.setString(2, linkid);
-            ps.setTimestamp(3, new Timestamp(System.currentTimeMillis()));
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            log.error("Failed insert Coupling Code", e);
-            throw new MusapException(e);
-        }
-        return couplingCode;
-    }
-    
-    /**
-     * Schedule a transaction cleanup task
-     * @param interval Task run interval (milliseconds)
-     * @return a handle to the timer
-     */
-    public static Timer scheduleCleaner(long interval) {
-
-        Timer timer = new Timer();
-        new Timer().scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                AccountStorage.cleanCouplingCodes();
-            }
-        }, interval, interval);
-        return timer;
-    }
-
-    /**
      * Store a MUSAP account
      * @param account New account
      */
     public static void storeAccount(MusapLinkAccount account) {
         if (account == null || account.musapid == null) {
-            log.error("Ignoring account with null musapid");
+            log.error("Ignoring account with null MUSAP ID");
             return;
         }
 
@@ -380,11 +290,14 @@ public class AccountStorage extends MusapDb {
             ps.setString(3, account.apnsToken);
             ps.setTimestamp(4, new Timestamp(System.currentTimeMillis()));
             ps.executeUpdate();
+            
+            storeTransportKeys(conn, account);
         } catch (SQLException e) {
             log.error("Failed insert MUSAP account", e);
             throw new MusapException(e);
         }
     }
+    
     /**
      * Update a MUSAP account
      * @param musapid MUSAP ID
@@ -483,5 +396,54 @@ public class AccountStorage extends MusapDb {
         }
 
     }
+    
+
+    /**
+     * Store transport encryption keys.
+     * Does nothing if given account object has no keys.
+     * @param conn DB connection
+     * @param account Account that contains the keys
+     */
+    private static void storeTransportKeys(Connection conn, MusapLinkAccount account) {
+        if (account == null) return;
+        if (account.aesKey == null) return;
+        if (account.macKey == null) return;
+        
+        try (PreparedStatement ps = conn.prepareStatement(INSERT_KEYS)) {
+            ps.setString(1, account.musapid);
+            ps.setBytes(2,  account.macKey);
+            ps.setBytes(3,  account.aesKey);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            log.error("Failed insert MUSAP transport keys", e);
+            throw new MusapException(e);
+        }
+    }
+    
+    /**
+     * Fetch and fill transport encryption keys to given MUSAP account
+     * @param conn    DB Connection
+     * @param account Account that should be filled
+     * @return Account with keys
+     */
+    private static MusapLinkAccount fillTransportKeys(Connection conn, MusapLinkAccount account) {
+        
+        if (account == null) return account;
+        
+        try (PreparedStatement ps = conn.prepareStatement(SELECT_KEYS)) {
+           ps.setString(1, account.musapid);
+           try (ResultSet result = ps.executeQuery()) {
+               if (result.next()) {
+                   account.macKey = result.getBytes(1);
+                   account.aesKey = result.getBytes(2);
+               }
+           }
+       } catch (SQLException e) {
+           log.error("Failed get Link IDs", e);
+           throw new MusapException(e);
+       }
+        return account;
+    }
+    
     
 }

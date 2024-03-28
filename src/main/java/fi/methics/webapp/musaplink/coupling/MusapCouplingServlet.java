@@ -7,9 +7,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import com.google.gson.Gson;
-
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdEnrollData;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdExternalSignature;
@@ -20,10 +17,10 @@ import fi.methics.webapp.musaplink.coupling.cmd.CmdSignatureCallback;
 import fi.methics.webapp.musaplink.coupling.cmd.CmdUpdateData;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
-import fi.methics.webapp.musaplink.util.GsonMessage;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
 import fi.methics.webapp.musaplink.util.MusapTransportEncryption;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
 
 /**
  * Servlet for communication between MUSAP and MUSAP Link.
@@ -32,8 +29,7 @@ import fi.methics.webapp.musaplink.util.MusapTransportEncryption;
 @Path("/")
 public class MusapCouplingServlet {
 
-    private static final Log  log  = LogFactory.getLog(MusapCouplingServlet.class);
-    private static final Gson GSON = GsonMessage.GSON;
+    private static final Log log = LogFactory.getLog(MusapCouplingServlet.class);
     
     private static MusapLinkConf conf;
     
@@ -55,7 +51,7 @@ public class MusapCouplingServlet {
     @Path("/musap")
     public Response musapEndpoint(String body) {
         
-        CouplingApiMessage jReq  = GSON.fromJson(body, CouplingApiMessage.class);
+        CouplingApiMessage jReq  = CouplingApiMessage.fromJson(body);
         CouplingApiMessage jResp = null;
 
         if (jReq == null) {
@@ -66,7 +62,7 @@ public class MusapCouplingServlet {
         MusapLinkAccount account = null;
         if (jReq.isEncrypted()) {
             // Fetch transport encryption keys and decrypt if needed
-            account = AccountStorage.findByLinkId(body);
+            account = AccountStorage.findAccountByLinkId(body);
             if (account != null && account.aesKey != null) {
                 try {
                     jReq.decrypt(account.aesKey);
@@ -74,6 +70,9 @@ public class MusapCouplingServlet {
                     log.error("Failed to decrypt message", e);
                     return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM, "Failed to decrypt the request: " + e.getMessage());
                 }
+            } else {
+                log.debug("Could not find transport encryption key");
+                return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM, "Failed to decrypt the request: Missing transport key");
             }
         }
 
@@ -138,21 +137,22 @@ public class MusapCouplingServlet {
         } else {
             log.debug("Response Payload: " + jReq.getPayloadJson());
             
-            if (MusapTransportEncryption.shouldEncrypt(jResp)) {
-                if (account == null) {
-                    account = AccountStorage.findByLinkId(body);
-                }
-                if (account != null) {
-                    try {
+
+            try {
+                if (MusapTransportEncryption.shouldEncrypt(jResp)) {
+                    if (account == null) {
+                        account = AccountStorage.findAccountByLinkId(body);
+                    }
+                    if (account != null) {
                         jResp.encrypt(account.aesKey);
-                    } catch (Exception e) {
-                        log.error("Failed to encrypt the response", e);
-                        return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM,  "Failed to encrypt the response: " + e.getMessage());
                     }
                 }
+            } catch (Exception e) {
+                log.error("Failed to encrypt the response", e);
+                return MusapResp.createErrorResponse(MusapResp.ERROR_WRONG_PARAM,  "Failed to encrypt the response: " + e.getMessage());
             }
             
-            return Response.ok(GSON.toJson(jResp)).build();
+            return Response.ok(jResp.toJson()).build();
         }
     }
     

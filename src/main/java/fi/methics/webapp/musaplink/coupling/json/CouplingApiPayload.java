@@ -1,5 +1,7 @@
 package fi.methics.webapp.musaplink.coupling.json;
 
+import com.google.gson.annotations.SerializedName;
+
 import fi.methics.webapp.musaplink.util.GsonMessage;
 
 /**
@@ -8,12 +10,23 @@ import fi.methics.webapp.musaplink.util.GsonMessage;
 public class CouplingApiPayload extends GsonMessage {
 
     // General values expected in MO messages
+    @SerializedName("os")
     public String os;
+    
+    @SerializedName("version")
     public String version;
+
+    @SerializedName("osversion")
     public String osversion;
+    
+    @SerializedName("model")
     public String model;
     
+    @SerializedName("nonce")
+    public String nonce;
+    
     // General values expected in MT messages
+    @SerializedName("status")
     public String status;
 
     /**

@@ -109,6 +109,14 @@ public class MusapLinkConf {
     }
     
     /**
+     * Should we treat transport encryption as mandatory?
+     * @return true if transport encryption is always mandatory in the Coupling API.
+     */
+    public boolean isTransportEncryptionRequired() {
+        return Boolean.getBoolean(this.properties.getProperty(PREFIX + "transport.encryption.required", "false"));
+    }
+    
+    /**
      * Get the configuration file path
      * @return conf file path
      */
