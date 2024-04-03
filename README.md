@@ -23,6 +23,10 @@ MUSAP Link API description can be found here:
 
 ![Link_Library_Architecture](https://github.com/methics/musap-link/assets/4453264/2997cae8-d44e-4709-8192-ae31624eff62)
 
+## Project Structure
+
+![MUSAP_Link_Project_Structure](https://github.com/methics/musap-link/assets/4453264/a3a63099-5a80-4842-995a-6ad214505131)
+
 ## Installation
 
 ### Building
