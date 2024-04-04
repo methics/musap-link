@@ -86,7 +86,13 @@
             <artifactId>bcpkix-jdk18on</artifactId>
             <version>1.77</version>
         </dependency>
-        
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version> <!-- Use the latest version available -->
+        </dependency>
+
+
         <!-- Fix attempt -->
         <dependency>
             <groupId>org.glassfish.hk2</groupId>

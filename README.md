@@ -23,6 +23,10 @@ MUSAP Link API description can be found here:
 
 ![Link_Library_Architecture](https://github.com/methics/musap-link/assets/4453264/2997cae8-d44e-4709-8192-ae31624eff62)
 
+## Project Structure
+
+![MUSAP_Link_Project_Structure](https://github.com/methics/musap-link/assets/4453264/a3a63099-5a80-4842-995a-6ad214505131)
+
 ## Installation
 
 ### Building
@@ -38,9 +42,18 @@ The SQL schema can be found [here](https://github.com/methics/musap-link/blob/ma
 
 ## Usage
 
-We recommend running MUSAP with:
+Installer needs to create musaplink.conf and fill PostgreSQL details. The configuration is copied into
+/usr/local/tomcat/conf.
 
-`mvn jetty:run`
+`cp musaplink.conf.sample musaplink.conf`
+
+### Building docker image
+
+`docker build -t musap-link .`
+
+### Running the container
+
+`docker run -p 8080:8080 musap-link:latest`
 
 ## Configuration
 
