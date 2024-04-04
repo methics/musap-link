@@ -210,10 +210,6 @@ public class CouplingApiMessage extends GsonMessage {
         if (this.transid == null && this.musapid == null) {
             throw new IOException("Message is missing transid and uuid");
         }
-        if (this.transid != null && this.musapid != null) {
-            log.trace("UUID and TransID not allowed in same message. UUID=" + this.musapid + ", TransID=" + this.transid);
-            throw new IOException("Message has both transid and uuid");
-        }
         String msgid   = this.transid != null ? this.transid : this.musapid;
         byte[] message = (msgid + this.type + this.iv + this.payload).getBytes(StandardCharsets.UTF_8);
         if (log.isTraceEnabled()) {
@@ -304,7 +300,7 @@ public class CouplingApiMessage extends GsonMessage {
         try {
             return Base64.getDecoder().decode(this.payload);
         } catch (Exception e) {
-            log.trace("Failed to decode payload:", e);
+            log.error("Failed to decode payload:", e);
             return null;
         }
     }
@@ -325,7 +321,7 @@ public class CouplingApiMessage extends GsonMessage {
             }
             return payload;
         } catch (Exception e) {
-            log.trace("Could not parse payload", e);
+            log.error("Could not parse payload", e);
             return null;
         }
     }
@@ -575,11 +571,11 @@ public class CouplingApiMessage extends GsonMessage {
             log.debug("No key to decrypt with.");
             throw new IOException("Decryption failed. Missing decryption key.");
         }
-        log.trace("Decrypting payload: " + this.payload);
+        log.debug("Decrypting payload: " + this.payload);
         Cipher cipher    = this.initCipher(Cipher.DECRYPT_MODE, aesKey);
         byte[] decrypted = cipher.doFinal(this.getPayload());
-        this.payload = Base64.getEncoder().encodeToString(decrypted);
-        log.trace("Decrypted payload: " + this.payload);
+        this.payload = new String(decrypted, StandardCharsets.UTF_8);
+        log.debug("Decrypted payload: " + this.payload);
         this.isEncrypted = false;
     }
     

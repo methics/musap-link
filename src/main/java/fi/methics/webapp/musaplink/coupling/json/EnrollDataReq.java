@@ -15,7 +15,6 @@ public class EnrollDataReq extends CouplingApiPayload {
     @SerializedName("apnstoken")
     public String apnstoken;
     
-    // This is always encrypted
     @SerializedName("tokendata")
     public String tokendata;
    
@@ -25,7 +24,7 @@ public class EnrollDataReq extends CouplingApiPayload {
 
     /**
      * Security related tokens & shared secret.
-     * These can be encrypted by the app and decrypted on SAM
+     * This can be encrypted by the app and decrypted on MUSAP Link.
      */
     public static class TokenData extends GsonMessage {
         @SerializedName("secret")
@@ -36,6 +35,13 @@ public class EnrollDataReq extends CouplingApiPayload {
         public static EnrollDataReq.TokenData fromBase64(String b64) {
             return GsonMessage.fromBase64(b64, EnrollDataReq.TokenData.class);
         }
+    }
+    
+    public String getSharedSecret() {
+        if (this.tokendata == null) return null;
+        TokenData data = TokenData.fromBase64(this.tokendata);
+        if (data == null) return null;
+        return data.secret;
     }
     
 }

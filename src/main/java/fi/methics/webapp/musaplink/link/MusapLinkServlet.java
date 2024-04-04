@@ -11,8 +11,6 @@ import javax.ws.rs.core.Response;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import fi.methics.webapp.musaplink.AccountStorage;
-import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.link.cmd.CmdDocSign;
 import fi.methics.webapp.musaplink.link.cmd.CmdGenerateKey;
 import fi.methics.webapp.musaplink.link.cmd.CmdLink;
@@ -31,6 +29,8 @@ import fi.methics.webapp.musaplink.link.json.MusapSignResp;
 import fi.methics.webapp.musaplink.link.json.MusapUpdateKeyReq;
 import fi.methics.webapp.musaplink.link.json.MusapUpdateKeyResp;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
+import fi.methics.webapp.musaplink.util.db.CouplingStorage;
+import fi.methics.webapp.musaplink.util.db.TxnStorage;
 
 /**
  * Servlet for communication between AP and MUSAP Link.
@@ -56,7 +56,7 @@ public class MusapLinkServlet {
         }
         log.info("MUSAP Link Servlet initialized");
         TxnStorage.scheduleCleaner(Duration.ofMinutes(1).toMillis());
-        AccountStorage.scheduleCleaner(Duration.ofMinutes(1).toMillis());
+        CouplingStorage.scheduleCleaner(Duration.ofMinutes(1).toMillis());
     }
     
     

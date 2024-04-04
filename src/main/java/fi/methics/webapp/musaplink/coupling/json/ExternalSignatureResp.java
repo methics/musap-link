@@ -31,9 +31,12 @@ public class ExternalSignatureResp extends CouplingApiPayload {
     @SerializedName("certificate")
     public String certificate;
 
+    @SerializedName("certificate_chain")
+    public List<byte[]> certChain;
+    
     @SerializedName("attributes")
     public Map<String, String> attributes = new HashMap<>();
-    
+
     public static ExternalSignatureResp fromJson(final String str) {
         return GSON.fromJson(str, ExternalSignatureResp.class);
     }

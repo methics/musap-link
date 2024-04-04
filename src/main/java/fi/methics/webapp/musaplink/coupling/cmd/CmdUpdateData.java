@@ -2,12 +2,12 @@ package fi.methics.webapp.musaplink.coupling.cmd;
 
 import java.io.IOException;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.coupling.json.UpdateDataReq;
 import fi.methics.webapp.musaplink.coupling.json.UpdateDataResp;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
 
 public class CmdUpdateData extends CouplingCommand {
 
@@ -23,7 +23,7 @@ public class CmdUpdateData extends CouplingCommand {
 
         final UpdateDataReq payload = this.getRequestPayload();
 
-        MusapLinkAccount account = AccountStorage.findByMusapId(req.musapid);
+        MusapLinkAccount account = AccountStorage.findAccountByMusapId(req.musapid);
         account.apnsToken = payload.apnstoken;
         account.fcmToken  = payload.fcmtoken;
         

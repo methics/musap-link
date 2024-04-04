@@ -1,4 +1,4 @@
-package fi.methics.webapp.musaplink;
+package fi.methics.webapp.musaplink.util.db;
 
 
 import java.sql.Connection;
@@ -20,7 +20,6 @@ import fi.methics.webapp.musaplink.util.IdGenerator;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.MusapLinkConf;
 import fi.methics.webapp.musaplink.util.SignatureCallback;
-import fi.methics.webapp.musaplink.util.db.MusapDb;
 
 /**
  * Database class for MUSAP Link transaction storage.
@@ -66,7 +65,7 @@ public class TxnStorage extends MusapDb {
     /**
      * Store a signature response
      * @param transid Transaction ID
-     * @param linkid  MUSAP Link Account ID
+     * @param musapid  MUSAP Link Account ID
      * @param resp    Signature response
      */
     public static void storeResponse(String transid, MusapSignResp resp) {
@@ -84,7 +83,7 @@ public class TxnStorage extends MusapDb {
     /**
      * Delete a transaction that has been handled
      * @param transid Transaction ID
-     * @param linkid  MUSAP Link Account ID
+     * @param musapid  MUSAP Link Account ID
      */
     public static void deleteTransaction(String transid) {
         log.info("Deleting handled transaction (transid=" + transid + ")");
@@ -101,7 +100,7 @@ public class TxnStorage extends MusapDb {
     /**
      * Get a Signature Response
      * @param transid Transaction ID
-     * @param linkid  MUSAP Link Account ID
+     * @param musapid  MUSAP Link Account ID
      * @return Signature Response or null if not found
      */
     public static MusapSignResp getSignResp(String transid) {

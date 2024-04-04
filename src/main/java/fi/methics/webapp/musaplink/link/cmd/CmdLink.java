@@ -2,12 +2,12 @@ package fi.methics.webapp.musaplink.link.cmd;
 
 import java.util.UUID;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.link.LinkCommand;
 import fi.methics.webapp.musaplink.link.json.MusapLinkReq;
 import fi.methics.webapp.musaplink.link.json.MusapLinkResp;
 import fi.methics.webapp.musaplink.util.CouplingCode;
 import fi.methics.webapp.musaplink.util.MusapException;
+import fi.methics.webapp.musaplink.util.db.CouplingStorage;
 
 
 /**
@@ -24,7 +24,7 @@ public class CmdLink extends LinkCommand<MusapLinkReq, MusapLinkResp> {
         MusapLinkResp jResp = new MusapLinkResp();
         
         String     linkid = newLinkId();
-        CouplingCode code = AccountStorage.newCouplingCode(linkid);
+        CouplingCode code = CouplingStorage.newCouplingCode(linkid);
         
         jResp.linkid       = linkid;
         jResp.couplingcode = code.getCode();

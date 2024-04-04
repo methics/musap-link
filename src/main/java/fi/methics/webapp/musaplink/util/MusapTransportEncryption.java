@@ -2,6 +2,8 @@ package fi.methics.webapp.musaplink.util;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +13,10 @@ import java.util.Objects;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
+import fi.methics.webapp.musaplink.coupling.json.CouplingApiPayload;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
 
 public class MusapTransportEncryption {
 
@@ -23,6 +28,8 @@ public class MusapTransportEncryption {
 
     private static final ExpirableMap<String, TransportKeys> EXP_MAP = new ExpirableMap<>(Interval.ofMinutes(10).toMillis());
     private static final Map<String, TransportKeys>          CACHE   = Collections.synchronizedMap(EXP_MAP);
+
+    private static final ExpirableSet<String> NONCE_SET = new ExpirableSet<>(Interval.ofMinutes(60).toMillis());
 
     private MusapLinkConf config;
     
@@ -86,7 +93,7 @@ public class MusapTransportEncryption {
             msg.setMac(this.calculateMac(tkeys, msg));
             return msg;
         } catch (Exception e) {
-            log.debug("Message encryption failed for MSISDN " + tkeys, e);
+            log.debug("Message encryption failed for " + tkeys, e);
             throw new IOException("Transport security error", e);
         }
     }
@@ -95,7 +102,7 @@ public class MusapTransportEncryption {
      * Decrypt a message
      * <p>Also calculates and verifies MAC
      * @param msg Message to encrypt
-     * @param tkeys UUID
+     * @param tkeys Transport Keys
      * @return Decrypted message
      * @throws IOException 
      * @throws GeneralSecurityException 
@@ -133,56 +140,71 @@ public class MusapTransportEncryption {
     }
 
     /**
-     * Clear transport encryption key cache for the given MSISDN
-     * @param uuid
+     * Clear transport encryption key cache for the given MUSAP ID
+     * @param musapid MUSAP ID
      */
-    public void clearCache(final String uuid) {
-        CACHE.remove(uuid);
+    public void clearCache(final String musapid) {
+        CACHE.remove(musapid);
     }
 
     /**
-     * Resolve encryption key for given MSISDN
-     * @param uuid UUID
+     * Resolve encryption key for given MUSAP ID
+     * @param musapid MUSAP ID
      * @return Encryption keys (contains null keys if not found)
      */
-    public TransportKeys resolveKeys(final String uuid) {
-        if (uuid == null) {
+    public TransportKeys resolveKeys(final String musapid) {
+        if (musapid == null) {
             return null;
         }
-        log.trace("Resolving transport keys for UUID " + uuid);
+        log.trace("Resolving transport keys for MUSAP ID " + musapid);
 
-        final TransportKeys cached = CACHE.get(uuid);
+        final TransportKeys cached = CACHE.get(musapid);
         if (cached != null) {
             log.trace("Resolved transport keys from cache");
             return cached;
         }
         try {
-            //final AppKeys          keys = this.config.getAppKeys();
-            //try (Connection conn = keys.getConnectionRO("AppTransportEncryption.FETCH")) {
-            //    final List<AppKeys.Row> keyRows = keys.fetchKeysByUUID(conn, uuid);
-            //    if (keyRows.size() > 0) {
-            //        AppKeys.Row enc = null;
-            //        AppKeys.Row mac = null;
-            //        for (AppKeys.Row k : keyRows) {
-            //            if (k.keytype == AppKeys.KEYTYPE_AES) enc = k;
-            //            if (k.keytype == AppKeys.KEYTYPE_MAC) mac = k;
-            //        }
-            //        if (enc != null && mac != null) {
-            //            final TransportKeys txnKeys = new TransportKeys(uuid, enc.key, mac.key);
-            //            if (this.config.isTransportEncryptionCacheEnabled()) {
-            //                CACHE.put(uuid, txnKeys);
-            //            }
-            //            return txnKeys;
-            //        }
-            //    }
-            //    log.debug("No transport keys found");
-            //    return null;
-            //}
-            return null;
-
+            MusapLinkAccount account = AccountStorage.findAccountByMusapId(musapid);
+            return account.getTransportKeys();
         } catch (Exception e) {
             log.debug("Failed to fetch transport keys", e);
             return null;
+        }
+    }
+    
+    /**
+     * Check if the nonce in the given message is acceptable.
+     * This compares the nonce to a used nonce list, and verifies that the message
+     * timestamp is not too old.
+     * @param msg Message to check
+     * @return true if nonce is acceptable
+     */
+    public boolean isNonceValid(CouplingApiMessage msg) {
+        
+        if (msg == null) return true;
+        if (msg.getBasePayload() == null) return true;
+        
+        CouplingApiPayload payload = msg.getBasePayload();
+        String nonce = payload.nonce;
+        
+        if (nonce == null) return true;
+        if (NONCE_SET.containsKey(nonce)) {
+            log.warn("Potential replay attack: NONCE already used");
+            return false;
+        }
+        NONCE_SET.add(nonce);
+        
+        if (payload.getTimestamp() == null) {
+            log.warn("Potential replay attack: No timestamp");
+            return false;
+        }
+        
+        // Check if the timestamp is within an hour
+        if (Instant.now().minus(Duration.ofHours(1)).isBefore(payload.getTimestamp())) {
+            return true;
+        } else {
+            log.warn("Potential replay attack: Timestamp too old (" + payload.getTimestamp() + ")");
+            return false;
         }
     }
     
@@ -200,19 +222,22 @@ public class MusapTransportEncryption {
         return msg.calculateMac(keys.mac);
     }
     
+    /**
+     * Class that contains MUSAP transport encryption keys
+     */
     public static class TransportKeys {
-        public String uuid;
+        public String musapid;
         public byte[] enc;
         public byte[] mac;
-        public TransportKeys(final String uuid, final byte[] enc, final byte[] mac) {
-            this.uuid = uuid;
+        public TransportKeys(final String musapid, final byte[] enc, final byte[] mac) {
+            this.musapid = musapid;
             this.enc = enc;
             this.mac = mac;
         }
         @Override
         public int hashCode() {
             final int prime = 31;
-            int result = this.uuid != null ? this.uuid.hashCode() : 0;
+            int result = this.musapid != null ? this.musapid.hashCode() : 0;
             if (this.enc != null) result = prime * result + Arrays.hashCode(this.enc);
             if (this.mac != null) result = prime * result + Arrays.hashCode(this.mac);
             return result;
@@ -223,9 +248,8 @@ public class MusapTransportEncryption {
             if (obj == null) return false;
             if (getClass() != obj.getClass()) return false;
             TransportKeys other = (TransportKeys) obj;
-            if (this.uuid != null) {
-                // MSISDN mismatch
-                if (!this.uuid.equals(other.uuid)) {
+            if (this.musapid != null) {
+                if (!this.musapid.equals(other.musapid)) {
                     return false;
                 }
             }
@@ -242,8 +266,8 @@ public class MusapTransportEncryption {
         
         @Override
         public String toString() {
-            final StringBuilder sb = new StringBuilder("TKey{uuid=");
-            sb.append(this.uuid);
+            final StringBuilder sb = new StringBuilder("TKey{musapid=");
+            sb.append(this.musapid);
             sb.append(", enc");
             sb.append(", mac");
             sb.append("}");

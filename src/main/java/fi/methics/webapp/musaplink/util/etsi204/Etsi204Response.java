@@ -3,7 +3,12 @@ package fi.methics.webapp.musaplink.util.etsi204;
 import java.security.cert.CertificateEncodingException;
 import java.util.Base64;
 import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
@@ -13,9 +18,12 @@ import fi.laverca.mss.MssException;
 
 public class Etsi204Response {
 
+    private static final Log log = LogFactory.getLog(Etsi204Response.class);
     private byte[] signature;
     private byte[] publickey;
     private byte[] certificate;
+    
+    private List<byte[]> certChain;
     
     /**
      * Create a response from a Laverca SOAP response
@@ -27,9 +35,10 @@ public class Etsi204Response {
             if (resp.getPkcs7Signature() != null && resp.getPkcs7Signature().getSignerCert() != null) {
                 this.certificate = resp.getPkcs7Signature().getSignerCert().getEncoded();
                 this.publickey   = resp.getPkcs7Signature().getSignerCert().getPublicKey().getEncoded();
+                this.certChain   = this.getCertificateChain(resp);
             }
         } catch (Exception e) {
-            // Ignore
+            log.error("Failed to parse response details", e);
         }
     }
     
@@ -60,6 +69,14 @@ public class Etsi204Response {
      */
     public byte[] getSignature() {
         return this.signature;
+    }
+    
+    /**
+     * Get the certificate chain
+     * @return certificate chain
+     */
+    public List<byte[]> getCertificateChain() {
+        return this.certChain;
     }
     
     /**
@@ -110,6 +127,21 @@ public class Etsi204Response {
     public String getCertificateB64() {
         byte[] cert = this.getCertificate();
         return Base64.getEncoder().encodeToString(cert);
+    }
+    
+    /**
+     * Get the certificate chain
+     * @param resp ETSI TS 102 204 response
+     * @return Certificate chain
+     */
+    private List<byte[]> getCertificateChain(EtsiResponse resp) {
+        return resp.getPkcs7Signature().getCertificateChain().stream().map(c -> {
+            try {
+                return c.getEncoded();
+            } catch (CertificateEncodingException e) {
+                return null;
+            }
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
     
 }

@@ -5,16 +5,16 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
-import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.link.LinkCommand;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignReq;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
 import fi.methics.webapp.musaplink.util.MusapException;
 import fi.methics.webapp.musaplink.util.SignatureCallback;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
+import fi.methics.webapp.musaplink.util.db.TxnStorage;
 import fi.methics.webapp.musaplink.util.push.PushClient;
 
 /**
@@ -32,7 +32,7 @@ public class CmdSign extends LinkCommand<MusapSignReq, MusapSignResp> {
         if (jReq == null) throw new MusapException(MusapResp.ERROR_WRONG_PARAM);
 
         String linkid = jReq.linkid;
-        MusapLinkAccount account = AccountStorage.findByLinkId(linkid);
+        MusapLinkAccount account = AccountStorage.findAccountByLinkId(linkid);
         if (account == null) {
             log.error("No account found with linkid " + linkid);
             throw new MusapException(MusapResp.ERROR_UNKNOWN_USER);
