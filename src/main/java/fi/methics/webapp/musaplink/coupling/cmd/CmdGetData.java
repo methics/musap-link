@@ -1,13 +1,13 @@
 package fi.methics.webapp.musaplink.coupling.cmd;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
-import fi.methics.webapp.musaplink.TxnStorage;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
 import fi.methics.webapp.musaplink.coupling.json.CouplingApiMessage;
 import fi.methics.webapp.musaplink.coupling.json.SignatureReq;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.MusapException;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
+import fi.methics.webapp.musaplink.util.db.TxnStorage;
 
 /**
  * Coupling API command for checking for pending signature or key generation requests.
@@ -27,7 +27,7 @@ public class CmdGetData extends CouplingCommand {
         log.info("Getting data for MUSAP ID " + musapid);
         log.debug("Total requests stored: " + TxnStorage.countTransactions());
         
-        MusapLinkAccount account = AccountStorage.findByMusapId(musapid);
+        MusapLinkAccount account = AccountStorage.findAccountByMusapId(musapid);
         if (account == null) throw new MusapException(MusapResp.ERROR_UNKNOWN_USER);
         
         for (String linkid : account.linkids) {

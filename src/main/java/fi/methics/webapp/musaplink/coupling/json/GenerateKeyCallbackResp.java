@@ -1,5 +1,7 @@
 package fi.methics.webapp.musaplink.coupling.json;
 
+import java.util.List;
+
 import com.google.gson.annotations.SerializedName;
 
 import fi.methics.webapp.musaplink.link.json.MusapCertificate;
@@ -17,6 +19,9 @@ public class GenerateKeyCallbackResp extends CouplingApiPayload {
 
     @SerializedName("certificate")
     public String certificate;
+
+    @SerializedName("certificate_chain")
+    public List<byte[]> certChain;
     
     @SerializedName("keyname")
     public String keyname;

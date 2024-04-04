@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import fi.methics.webapp.musaplink.AccountStorage;
 import fi.methics.webapp.musaplink.MusapLinkAccount;
 import fi.methics.webapp.musaplink.MusapLinkAccount.MusapKey;
 import fi.methics.webapp.musaplink.coupling.CouplingCommand;
@@ -16,6 +15,7 @@ import fi.methics.webapp.musaplink.coupling.json.MusapErrorMsg;
 import fi.methics.webapp.musaplink.link.json.MusapResp;
 import fi.methics.webapp.musaplink.util.IdGenerator;
 import fi.methics.webapp.musaplink.util.MusapException;
+import fi.methics.webapp.musaplink.util.db.AccountStorage;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Client;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Exception;
 import fi.methics.webapp.musaplink.util.etsi204.Etsi204Response;
@@ -40,7 +40,7 @@ public class CmdExternalSignature extends CouplingCommand {
         CouplingApiMessage req = this.getRequest();
         String musapid = req.musapid;
         
-        MusapLinkAccount account = AccountStorage.findByMusapId(musapid);
+        MusapLinkAccount account = AccountStorage.findAccountByMusapId(musapid);
         if (account == null) throw new MusapException(MusapResp.ERROR_UNKNOWN_USER);
 
         ExternalSignatureReq sigReq = this.getRequestPayload();
@@ -126,6 +126,7 @@ public class CmdExternalSignature extends CouplingCommand {
                 try {
                     sigResp.publickey   = resp.getPublicKeyB64();
                     sigResp.certificate = resp.getCertificateB64();
+                    sigResp.certChain   = resp.getCertificateChain();
                 } catch (Exception e) {
                     log.warn("Failed to parse certificate from response", e);
                 }

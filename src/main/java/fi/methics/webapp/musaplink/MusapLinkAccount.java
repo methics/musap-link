@@ -10,6 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import fi.methics.webapp.musaplink.coupling.json.ExternalSignatureResp;
 import fi.methics.webapp.musaplink.link.json.MusapSignResp;
+import fi.methics.webapp.musaplink.util.MusapTransportEncryption.TransportKeys;
 
 /**
  * Class representing a single account in MUSAP Link
@@ -26,6 +27,16 @@ public class MusapLinkAccount {
     
     public MusapLinkAccount() {
         
+    }
+    
+    /**
+     * Get transport keys
+     * @return transport keys - or null if not available
+     */
+    public TransportKeys getTransportKeys() {
+        if (this.aesKey == null) return null;
+        if (this.macKey == null) return null;
+        return new TransportKeys(this.musapid, this.aesKey, this.macKey);
     }
     
     @Override

@@ -45,10 +45,13 @@ public class Etsi204SoapClient extends Etsi204Client {
             
             List<AdditionalServiceType> additionalServices = new ArrayList<>();
             if (this.enableEventId) {
-                additionalServices.add(FiComAdditionalServices.createEventIdService(transid));
+                String eventid = this.resolveEventId(transid, attrs);
+                additionalServices.add(FiComAdditionalServices.createEventIdService(eventid));
             }
             if (this.enableNoSpamCode) {
-                additionalServices.add(FiComAdditionalServices.createNoSpamService(null, false));
+                String  nospamcode = this.resolveNospamCode(attrs);
+                boolean validate   = nospamcode != null;
+                additionalServices.add(FiComAdditionalServices.createNoSpamService(nospamcode, validate));
             }
             
             String mimeType = attrs.get(ATTR_MIMETYPE);
@@ -68,5 +71,6 @@ public class Etsi204SoapClient extends Etsi204Client {
             throw new Etsi204Exception(e);
         }
     }
+    
     
 }

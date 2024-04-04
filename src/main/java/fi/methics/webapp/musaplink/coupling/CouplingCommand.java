@@ -61,7 +61,7 @@ public abstract class CouplingCommand {
      * @return Transport Encryption handler
      */
     public MusapTransportEncryption getTransportEncryption() {
-        return null;
+        return new MusapTransportEncryption(getConfig());
     }
     
     /**

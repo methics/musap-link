@@ -41,10 +41,8 @@ public class MusapLinkConf {
         this.filename    = filename;
         this.initialized = true;
         this.properties  = readProperties(this.filename);
-        if (this.properties != null) {
-            this.fcmConfig   = new FcmConfig(this.properties, PREFIX);
-            this.apnsConfig  = new ApnsConfig(this.properties, PREFIX);
-        }
+        this.fcmConfig   = new FcmConfig(this.properties, PREFIX);
+        this.apnsConfig  = new ApnsConfig(this.properties, PREFIX);
     }
     
     public static MusapLinkConf getInstance() {
@@ -108,6 +106,14 @@ public class MusapLinkConf {
      */
     public boolean isInitialized() {
         return this.initialized;
+    }
+    
+    /**
+     * Should we treat transport encryption as mandatory?
+     * @return true if transport encryption is always mandatory in the Coupling API.
+     */
+    public boolean isTransportEncryptionRequired() {
+        return Boolean.getBoolean(this.properties.getProperty(PREFIX + "transport.encryption.required", "false"));
     }
     
     /**

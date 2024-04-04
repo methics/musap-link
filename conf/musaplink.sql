@@ -10,6 +10,7 @@ CREATE TABLE transactions (
 CREATE TABLE coupling_codes (
     couplingcode TEXT,
     linkid TEXT,
+    created_dt TIMESTAMP
     PRIMARY KEY (couplingcode)
 );
 
@@ -39,5 +40,9 @@ CREATE TABLE key_details (
     musapid TEXT,
     keyid TEXT,
     keyname TEXT,
+    publickey BYTEA,
+    certificate BYTEA,
+    created_dt TIMESTAMP,
+    modified_dt TIMESTAMP,
     PRIMARY KEY (musapid, keyid)
 );
