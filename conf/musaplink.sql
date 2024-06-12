@@ -10,7 +10,7 @@ CREATE TABLE transactions (
 CREATE TABLE coupling_codes (
     couplingcode TEXT,
     linkid TEXT,
-    created_dt TIMESTAMP
+    created_dt TIMESTAMP,
     PRIMARY KEY (couplingcode)
 );
 
