@@ -156,8 +156,9 @@ public class MusapLinkConf {
                 String keystoreType = this.properties.getProperty(PREFIX + "client.keystore.type." + i);
                 String sigProfile   = this.properties.getProperty(PREFIX + "client.signature.profile." + i, Etsi204Client.SIGPROF_ALAUDA_SIGN);
                 
-                boolean enableNospam  = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.nospam.enabled" + i));
-                boolean enableEventid = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.eventid.enabled." + i));
+                boolean enableNospam   = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.nospam.enabled" + i));
+                boolean enableEventid  = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.eventid.enabled." + i));
+                boolean enableUserLang = Boolean.valueOf(this.properties.getProperty(PREFIX + "client.userlang.enabled." + i));
 
                 ClientType clientType = ClientType.fromString(this.properties.getProperty(PREFIX + "client.type." + i));
                 
@@ -179,6 +180,7 @@ public class MusapLinkConf {
                         .withKeystoreType(keystoreType)
                         .withEventIdEnabled(enableEventid)
                         .withNospamEnabled(enableNospam)
+                        .withUserLangEnabled(enableUserLang)
                         .withClientType(clientType)
                         .build());
             } catch (Exception e) {

@@ -24,6 +24,7 @@ public abstract class Etsi204Client {
     
     protected boolean enableNoSpamCode;
     protected boolean enableEventId;
+    protected boolean enableUserLang;
     
     protected String signatureProfile;
     
@@ -38,6 +39,10 @@ public abstract class Etsi204Client {
 
     public void setNospamCodeEnabled(boolean enabled) {
         this.enableNoSpamCode = enabled;
+    }
+
+    public void setUserLangEnabled(boolean enabled) {
+        this.enableUserLang = enabled;
     }
     
     /**
@@ -105,6 +110,16 @@ public abstract class Etsi204Client {
      */
     public String resolveNospamCode(Map<String, String> attrs) {
         return attrs.get("nospamcode");
+    }
+
+    /**
+     * Resolve UserLang from attribute "userlang".
+     * @param attrs   Attributes
+     * @return UserLang to use - or "en" if not found
+     */
+    public String resolveUserLang(Map<String, String> attrs) {
+        String userlang = attrs.get("userlang");
+        return userlang != null ? userlang : "en";
     }
     
     public static enum ClientType {
