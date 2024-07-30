@@ -44,7 +44,8 @@ public class Etsi204ClientBuilder {
     private String signatureProfile;
     private boolean enableNospamCode;
     private boolean enableEventId;
-    
+    private boolean enableUserLang;
+
     public Etsi204ClientBuilder(String clientid, String sscdtype) {
         this.clientid = clientid;
         this.sscdtype = sscdtype;
@@ -92,6 +93,7 @@ public class Etsi204ClientBuilder {
         }
         result.setEventIdEnabled(this.enableEventId);
         result.setNospamCodeEnabled(this.enableNospamCode);
+        result.setUserLangEnabled(this.enableUserLang);
         result.setSignatureProfile(this.signatureProfile);
         return result;
     }
@@ -163,6 +165,11 @@ public class Etsi204ClientBuilder {
 
     public Etsi204ClientBuilder withNospamEnabled(boolean enabled) {
         this.enableNospamCode = enabled;
+        return this;
+    }
+
+    public Etsi204ClientBuilder withUserLangEnabled(boolean enabled) {
+        this.enableUserLang = enabled;
         return this;
     }
     

@@ -53,7 +53,10 @@ public class Etsi204SoapClient extends Etsi204Client {
                 boolean validate   = nospamcode != null;
                 additionalServices.add(FiComAdditionalServices.createNoSpamService(nospamcode, validate));
             }
-            
+            if (this.enableUserLang) {
+                String userlang = this.resolveUserLang(attrs);
+                additionalServices.add(FiComAdditionalServices.createUserLangService(userlang));
+            }
             String mimeType = attrs.get(ATTR_MIMETYPE);
             if (mimeType == null) mimeType = DEFAULT_MIMETYPE;
             
@@ -71,6 +74,5 @@ public class Etsi204SoapClient extends Etsi204Client {
             throw new Etsi204Exception(e);
         }
     }
-    
     
 }
